@@ -10,7 +10,7 @@ sealed class Screen(val route: String) {
 
     object AiRecommendationScreen : Screen(AI_RECOMMENDATION_SCREEN)
 
-    object GameDetailsScreen : Screen(GAME_DETAILS_SCREEN)
+    object CustomChallengesScreen : Screen(CUSTOM_CHALLENGES_SCREEN)
 
     object LibraryScreen : Screen(LIBRARY_SCREEN)
 
@@ -33,7 +33,7 @@ sealed class Screen(val route: String) {
 
         const val AI_RECOMMENDATION_SCREEN = "ai_recommendation_screen"
 
-        const val GAME_DETAILS_SCREEN = "game_details_screen"
+        const val CUSTOM_CHALLENGES_SCREEN = "custom_challenges_screen"
 
         const val LIBRARY_SCREEN = "library_screen"
 

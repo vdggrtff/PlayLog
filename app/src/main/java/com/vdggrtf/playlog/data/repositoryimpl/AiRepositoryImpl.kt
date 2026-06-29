@@ -234,4 +234,47 @@ class AiRepositoryImpl @Inject constructor(private val supabase: SupabaseClient)
             }
         }
     }
+
+    override suspend fun verifyCustomChallenge(
+        imageBytes: ByteArray,
+        gameName: String,
+        challengePrompt: String
+    ): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.i("GeminiHelper", "[Custom Challenge]: Проверка челленджа для $gameName")
+                val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+
+                val prompt = """
+                You are a strict anti-cheat moderator for a video game tracking application.
+                A user claims to have completed a custom challenge for the game "$gameName".
+                
+                YOUR OBJECTIVE:
+                Analyze the provided screenshot and verify if the following condition is met:
+                ---
+                CHALLENGE CONDITION: "$challengePrompt"
+                ---
+                
+                Look closely at UI elements, inventory, mods, timers, or character stats that match the condition.
+                
+                Return EXACTLY ONE WORD:
+                TRUE - if the screenshot clearly proves the challenge condition is met.
+                FALSE - if it does not prove it, or if it's unrelated.
+            """.trimIndent()
+
+                val response = generativeModel.generateContent(content {
+                    image(bitmap)
+                    text(prompt)
+                })
+
+                val answer = response.text?.trim()?.uppercase() ?: "FALSE"
+                Log.d("GeminiHelper", "[Custom Challenge]: Вердикт ИИ -> $answer")
+
+                answer.contains("TRUE")
+            } catch (e: Exception) {
+                Log.e("GeminiHelper", "[Custom Challenge Error]: ${e.message}")
+                false
+            }
+        }
+    }
 }

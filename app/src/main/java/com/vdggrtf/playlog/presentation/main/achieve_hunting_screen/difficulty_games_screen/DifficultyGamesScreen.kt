@@ -16,6 +16,7 @@ import com.vdggrtf.playlog.R
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
 import com.vdggrtf.playlog.presentation.components.list.GamesListTemplate
 import com.vdggrtf.playlog.presentation.main.my_library.MyLibraryViewModel
+import com.vdggrtf.playlog.presentation.main.recommendation.custom_challenges.ChallengeBoardRoute
 
 @Composable
 fun DifficultyGamesScreen(
@@ -23,6 +24,17 @@ fun DifficultyGamesScreen(
     onBack: () -> Unit,
     onGameClick: (String) -> Unit,
 ) {
+
+    if (difficultyName == AchievementDifficulty.CUSTOM_CHALLENGE.name) {
+        // 🚀 ЕСЛИ ЧЕЛЛЕНДЖ - РЕНДЕРИМ НАШУ КРУТУЮ ДОСКУ КОНТРАКТОВ!
+        ChallengeBoardRoute(
+            onBackClick = onBack,
+            onChallengeClick = { gameId -> onGameClick(gameId.toString()) },
+            showOnlyCompleted = true // <-- Флаг, который мы добавим сейчас!
+        )
+        return // Прерываем выполнение функции, дальше не идем
+    }
+
     val viewModel: MyLibraryViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
 

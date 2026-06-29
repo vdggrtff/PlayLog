@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -53,6 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vdggrtf.playlog.R
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
 import com.vdggrtf.playlog.domain.model.GameStatus
@@ -174,6 +176,7 @@ fun GameDetailsScreen(
 
     Scaffold(
         containerColor = Background,
+        contentWindowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp),
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { showBottomBar = true },
@@ -194,7 +197,6 @@ fun GameDetailsScreen(
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -202,7 +204,26 @@ fun GameDetailsScreen(
                 contentPadding = PaddingValues(bottom = 100.dp)
             ) {
                 //  HEADER
-                item { GameHeaderSection(state) }
+                item {
+                    Box { // We wrap Header and Back Button in a Box inside the list!
+                        GameHeaderSection(state)
+
+                        // FIX 3: Back button is now INSIDE the scrollable list.
+                        // It will scroll up and disappear when user scrolls down to read text.
+                        IconButton(
+                            onClick = onBackClick,
+                            modifier = Modifier
+                                .padding(top = 40.dp, start = 16.dp) // Offset for status bar
+                                .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.back),
+                                tint = Color.White
+                            )
+                        }
+                    }
+                }
 
                 item {
                     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -266,27 +287,7 @@ fun GameDetailsScreen(
                     }
                 }
             }
-
-            // Header buttons
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 40.dp, start = 8.dp, end = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(
-                    onClick = onBackClick,
-                    modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.back),
-                        tint = Color.White
-                    )
-                }
-            }
         }
-    }
 
     // Bottom sheet (Game walkthrough selection)
     if (showBottomBar) {

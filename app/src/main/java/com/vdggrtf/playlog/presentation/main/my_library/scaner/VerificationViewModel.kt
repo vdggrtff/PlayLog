@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
+import com.vdggrtf.playlog.domain.model.CustomChallengeModel
 import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.domain.model.GameStatus
 import com.vdggrtf.playlog.domain.repository.AiRepository
@@ -64,6 +65,46 @@ class VerificationViewModel @Inject constructor(
             } catch (e: Exception) {
                 Log.e("VerificationVM", "[AI Scanner Error]: ${e.message}")
                 _state.update { it.copy(isThinking = false, error = "Ошибка сети или ИИ") }
+            }
+        }
+    }
+
+    fun verifyCustomChallenge(
+        imageBytes: ByteArray,
+        challenge: CustomChallengeModel,
+        gameName: String // We need the game name for the prompt context
+    ) {
+        viewModelScope.launch {
+            _state.update { it.copy(isThinking = true, error = null, isSuccess = false) }
+
+            try {
+                Log.i("VerificationVM", "[Bounty Scanner]: Checking proof for ${challenge.title}")
+
+                // Call the new method we added to AiRepository yesterday
+                val isVerified = aiRepository.verifyCustomChallenge(
+                    imageBytes = imageBytes,
+                    gameName = gameName,
+                    challengePrompt = challenge.aiPrompt
+                )
+
+                if (isVerified) {
+                    Log.d("VerificationVM", "[Bounty Scanner]: SUCCESS! Challenge completed.")
+
+                    // TODO: Here we will later write to Supabase 'user_completed_challenges'
+
+                    _state.update { it.copy(isThinking = false, isSuccess = true) }
+                } else {
+                    Log.w("VerificationVM", "[Bounty Scanner]: REJECTED by AI.")
+                    _state.update {
+                        it.copy(
+                            isThinking = false,
+                            error = "Proof rejected! Ensure your screenshot clearly shows the required condition."
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("VerificationVM", "[Bounty Scanner Error]: ${e.message}")
+                _state.update { it.copy(isThinking = false, error = "AI Network Error") }
             }
         }
     }

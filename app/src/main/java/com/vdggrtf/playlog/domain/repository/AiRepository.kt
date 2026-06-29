@@ -10,4 +10,10 @@ interface AiRepository {
     suspend fun scanLibraryForGames(imageBytes: ByteArray): List<String>
 
     suspend fun saveDifficultyToGlobalCache(gameId: Int, difficulty: AchievementDifficulty)
+
+    suspend fun verifyCustomChallenge(
+        imageBytes: ByteArray,
+        gameName: String,
+        challengePrompt: String
+    ): Boolean
 }
