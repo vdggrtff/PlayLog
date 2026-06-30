@@ -46,6 +46,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
 import com.vdggrtf.playlog.domain.model.CustomChallengeModel
+import com.vdggrtf.playlog.domain.model.GameStatus
 
 // 1. SMART ROUTE (Handles ViewModel and Navigation)
 @Composable
@@ -159,6 +160,32 @@ fun BountyGridCard(
                     )
                 )
         )
+
+        if (!challenge.isCompleted && challenge.status != GameStatus.NONE) {
+            val (badgeColor, badgeText) = if (challenge.status == GameStatus.PLAYING) {
+                Color(0xFF00E5FF) to "PLAYING" // AiAccent
+            } else {
+                Color.Gray to "BACKLOG"
+            }
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart) // В левом верхнем углу!
+                    .padding(8.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(badgeColor.copy(alpha = 0.2f))
+                    .border(1.dp, badgeColor, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = badgeText,
+                    color = badgeColor,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 10.sp
+                )
+            }
+        }
+
 
         if (challenge.isCompleted) {
             // Затемняем карточку, чтобы она выглядела "закрытой"

@@ -1,5 +1,6 @@
 package com.vdggrtf.playlog.presentation.main.my_library
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vdggrtf.playlog.data.network.dto.CompletedIdDto
@@ -67,13 +68,13 @@ class MyLibraryViewModel @Inject constructor(private val repository: LibraryRepo
             launch {
                 try {
                     val completedBounties = supabase.from("user_challenge_status")
-                        .select(columns = io.github.jan.supabase.postgrest.query.Columns.list("id")) {
+                        .select(columns = io.github.jan.supabase.postgrest.query.Columns.list("challenge_id")) {
                             filter { eq("status", "COMPLETED") }
                         }.decodeList<CompletedIdDto>().size
 
                     _state.update { it.copy(completedBountiesCount = completedBounties) }
                 } catch (e: Exception) {
-                    // Ignore network error to keep the offline-first experience smooth
+                    Log.e("MyLibrary", "Ошибка загрузки счетчика контрактов: ${e.message}")
                 }
             }
 

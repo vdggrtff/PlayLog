@@ -23,13 +23,14 @@ fun DifficultyGamesScreen(
     difficultyName: String,
     onBack: () -> Unit,
     onGameClick: (String) -> Unit,
+    onChallengeClick: (Int) -> Unit
 ) {
 
     if (difficultyName == AchievementDifficulty.CUSTOM_CHALLENGE.name) {
         // 🚀 ЕСЛИ ЧЕЛЛЕНДЖ - РЕНДЕРИМ НАШУ КРУТУЮ ДОСКУ КОНТРАКТОВ!
         ChallengeBoardRoute(
             onBackClick = onBack,
-            onChallengeClick = { gameId -> onGameClick(gameId.toString()) },
+            onChallengeClick = onChallengeClick,
             showOnlyCompleted = true // <-- Флаг, который мы добавим сейчас!
         )
         return // Прерываем выполнение функции, дальше не идем

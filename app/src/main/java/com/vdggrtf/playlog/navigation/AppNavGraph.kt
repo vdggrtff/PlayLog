@@ -145,7 +145,8 @@ fun AppNavGraph(navController: NavHostController) {
                 onBack = { navController.popBackStack() },
                 onGameClick = { gameId ->
                     navController.navigate("details/$gameId")
-                }
+                },
+                onChallengeClick = { challengeId -> navController.navigate("challenge_details/$challengeId") }
             )
         }
         composable(Screen.ProfileScreen.route) {
