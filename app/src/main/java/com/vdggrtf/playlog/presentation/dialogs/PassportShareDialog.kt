@@ -40,6 +40,7 @@ fun PassportShareDialog(
     completedGames: Int,
     favDifficulty: String,
     customChallengesCount: Int,
+    totalBounty: Int,
     onDismiss: () -> Unit,
 ) {
     val captureController = rememberCaptureController()
@@ -73,7 +74,8 @@ fun PassportShareDialog(
                     totalGames = totalGames,
                     completedGames = completedGames,
                     favDifficulty = favDifficulty,
-                    customChallengesCount = customChallengesCount
+                    customChallengesCount = customChallengesCount,
+                    totalBounty = totalBounty
                 )
             }
 

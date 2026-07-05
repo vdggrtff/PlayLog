@@ -116,7 +116,8 @@ fun ProfileScreen(
             totalGames = state.totalGames,
             completedGames = state.completedGames,
             customChallengesCount = state.mythicalCount,
-            favDifficulty = state.favDifficulty
+            favDifficulty = state.favDifficulty,
+            totalBounty = state.totalBounty
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -196,6 +197,7 @@ fun ProfileScreen(
             completedGames = state.completedGames,
             favDifficulty = state.favDifficulty,
             customChallengesCount = state.mythicalCount,
+            totalBounty = state.totalBounty,
             onDismiss = { showPassportDialog = false }
         )
     }
