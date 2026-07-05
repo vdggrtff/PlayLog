@@ -4,12 +4,16 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vdggrtf.playlog.data.local.datastore.UserStorage
+import com.vdggrtf.playlog.data.network.dto.BountyRewardDto
+import com.vdggrtf.playlog.data.network.dto.CompletedBountyDto
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
 import com.vdggrtf.playlog.domain.model.GameStatus
 import com.vdggrtf.playlog.domain.repository.LibraryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -27,7 +31,8 @@ data class ProfileState(
     val totalGames: Int = 0,
     val completedGames: Int = 0,
     val mythicalCount: Int = 0,
-    val favDifficulty: String = "N/A"
+    val favDifficulty: String = "N/A",
+    val totalBounty: Int = 0
 )
 
 
@@ -50,6 +55,9 @@ class ProfileViewModel @Inject constructor(
 
         // Starting statistics collection
         observeLibraryStats()
+
+        // 💥 Fetching XP!
+        calculateTotalBounty()
     }
 
     private fun observeLocalStorage() {
@@ -104,6 +112,35 @@ class ProfileViewModel @Inject constructor(
                     mythicalCount = custom,
                     favDifficulty = peakDiff
                 ) }
+            }
+        }
+    }
+
+    private fun calculateTotalBounty(){
+        viewModelScope.launch {
+            try {
+                // 1. Get IDs of completed challenges
+                val completedRecords = supabase.from("user_challenge_status")
+                    .select(columns = Columns.list("challenge_id")) {
+                        filter {  eq("status", "COMPLETED") }
+                    }.decodeList<CompletedBountyDto>()
+
+                val ids = completedRecords.map { it.challengeId }
+
+                if(ids.isEmpty()) return@launch
+
+                // 2. Fetch the actual reward points for these challenges
+                // Supabase trick: using 'in' filter to get multiple rows by ID
+                val rewards = supabase.from("custom_challenge")
+                    .select(columns = Columns.list("reward_points")) {
+                        filter { isIn("id", ids) }
+                    }.decodeList<BountyRewardDto>()
+
+                // 3. Math time!
+                val total = rewards.sumOf { it.rewardPoints }
+                _state.update { it.copy(totalBounty = total) }
+            } catch (e: Exception){
+                Log.e("ProfileVM", "Ошибка подсчета Bounty: ${e.message}")
             }
         }
     }

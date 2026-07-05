@@ -16,10 +16,12 @@ import com.vdggrtf.playlog.presentation.auth.registrartion.RegistrationScreen
 import com.vdggrtf.playlog.presentation.main.achieve_hunting_screen.AchievementsScreen
 import com.vdggrtf.playlog.presentation.main.achieve_hunting_screen.difficulty_games_screen.DifficultyGamesScreen
 import com.vdggrtf.playlog.presentation.main.game_details.GameDetailsScreen
+import com.vdggrtf.playlog.presentation.main.recommendation.custom_challenges.challenge.ChallengeDetailsRoute
 import com.vdggrtf.playlog.presentation.main.my_library.LibraryScreen
 import com.vdggrtf.playlog.presentation.main.profile.ProfileScreen
 import com.vdggrtf.playlog.presentation.main.recommendation.RecommendationScreen
 import com.vdggrtf.playlog.presentation.main.recommendation.ai.AiAssistantScreen
+import com.vdggrtf.playlog.presentation.main.recommendation.custom_challenges.ChallengeBoardRoute
 import com.vdggrtf.playlog.presentation.main.recommendation.search.SearchScreen
 import com.vdggrtf.playlog.presentation.splash.SplashScreen
 
@@ -81,7 +83,30 @@ fun AppNavGraph(navController: NavHostController) {
             RecommendationScreen(
                 onSearchClick = { navController.navigate(Screen.SearchScreen.route) },
                 onGameClick = { gameId -> navController.navigate("details/$gameId") },
-                onAiAssistantClick = { navController.navigate(Screen.AiRecommendationScreen.route) })
+                onAiAssistantClick = { navController.navigate(Screen.AiRecommendationScreen.route) },
+                onNavigateToChallenges = {navController.navigate(Screen.CustomChallengesScreen.route)}
+            )
+        }
+        composable(route = Screen.CustomChallengesScreen.route) {
+            ChallengeBoardRoute(
+                onBackClick = { navController.popBackStack() },
+                onChallengeClick = { challengeId ->
+                    navController.navigate("challenge_details/$challengeId")
+                }
+            )
+        }
+        composable(
+            route = "challenge_details/{challengeId}",
+            arguments = listOf(navArgument("challengeId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            // FIX 2: Extract the ID from the URL and pass it to the Route
+            val challengeId = backStackEntry.arguments?.getInt("challengeId") ?: return@composable
+
+            ChallengeDetailsRoute(
+                challengeId = challengeId, // Passed here!
+                onBackClick = { navController.popBackStack() },
+                onNavigateToGame = { gameId -> navController.navigate("details/$gameId") }
+            )
         }
         composable(route = Screen.SearchScreen.route) {
             SearchScreen(
@@ -120,7 +145,8 @@ fun AppNavGraph(navController: NavHostController) {
                 onBack = { navController.popBackStack() },
                 onGameClick = { gameId ->
                     navController.navigate("details/$gameId")
-                }
+                },
+                onChallengeClick = { challengeId -> navController.navigate("challenge_details/$challengeId") }
             )
         }
         composable(Screen.ProfileScreen.route) {

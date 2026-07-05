@@ -48,12 +48,13 @@ fun GamerPassportUi(
     completedGames: Int,
     favDifficulty: String,
     customChallengesCount: Int,
+    totalBounty: Int
 ) {
     // vertical ID-card
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(420.dp)
+            //.height(420.dp)
             .clip(CutCornerShape(topStart = 32.dp, bottomEnd = 32.dp))
             .background(Brush.verticalGradient(colors = listOf(CardBackground, Color(0xFF050508))))
             .border(
@@ -158,6 +159,12 @@ fun GamerPassportUi(
                 customChallengesCount.toString(),
                 Color(0xFFFFD700)
             )
+            Spacer(modifier = Modifier.height(12.dp))
+            CyberStatItem(
+                label = "TOTAL BOUNTY", // Can move to strings.xml later
+                value = "$totalBounty", // Added Cyber-Credits symbol
+                color = Color(0xFFFF9100) // Badass Orange/Gold
+            )
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -206,7 +213,7 @@ fun CyberStatItem(label: String, value: String, color: Color) {
             letterSpacing = 0.5.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1.5f)
+            modifier = Modifier.weight(1f)
         )
 
         Spacer(modifier = Modifier.width(4.dp))
@@ -215,7 +222,7 @@ fun CyberStatItem(label: String, value: String, color: Color) {
         Text(
             text = value,
             color = color,
-            fontSize = 16.sp,
+            fontSize = 15.sp,
             fontWeight = FontWeight.Black,
             maxLines = 1,
             textAlign = TextAlign.End,

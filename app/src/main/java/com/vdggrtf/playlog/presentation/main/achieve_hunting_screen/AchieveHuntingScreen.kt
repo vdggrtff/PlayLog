@@ -111,7 +111,8 @@ fun AchievementsScreen(
                 Spacer(modifier = Modifier.weight(1f))
                 DifficultySquareCard(
                     difficulty = row3[0],
-                    count = gamesByDifficulty[row3[0]]?.size ?: 0,
+                    // FIXED: Replaced standard local games count with the actual completed bounties count from Supabase
+                    count = state.completedBountiesCount,
                     modifier = Modifier.weight(1f),
                     onClick = { onCategoryClick(row3[0].name) }
                 )

@@ -10,6 +10,7 @@ import com.vdggrtf.playlog.data.network.dto.AchievementDto
 import com.vdggrtf.playlog.data.network.dto.CashedGameDto
 import com.vdggrtf.playlog.data.network.dto.SupabaseGameDto
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
+import com.vdggrtf.playlog.domain.model.CustomChallengeModel
 import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.domain.model.GameStatus
 import com.vdggrtf.playlog.domain.repository.AiRepository
@@ -42,6 +43,8 @@ data class GameDetailsState(
     val dealUrl: String? = null,
     val communityDifficulty: AchievementDifficulty = AchievementDifficulty.NONE,
     val communityVotesCount: Int = 0,
+    val customChallenges: List<CustomChallengeModel> = emptyList(),
+    val isChallengeVerifying: Boolean = false
 )
 
 
@@ -413,5 +416,4 @@ class GameDetailsViewModel @Inject constructor(
             }
         }
     }
-
 }

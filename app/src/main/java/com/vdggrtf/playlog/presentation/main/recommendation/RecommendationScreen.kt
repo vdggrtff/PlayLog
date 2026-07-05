@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vdggrtf.playlog.R
 import com.vdggrtf.playlog.presentation.components.list.GamesListTemplate
+import com.vdggrtf.playlog.presentation.components.tabs.DiscoveryWidgetsRow
 import com.vdggrtf.playlog.ui.theme.AiAccent
 import com.vdggrtf.playlog.ui.theme.AiGradient
 import com.vdggrtf.playlog.ui.theme.Background
@@ -43,6 +44,7 @@ fun RecommendationScreen(
     onGameClick: (String) -> Unit,
     onSearchClick: () -> Unit,
     onAiAssistantClick: () -> Unit,
+    onNavigateToChallenges: () -> Unit
 ) {
     val viewModel: RecommendationViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
@@ -87,7 +89,11 @@ fun RecommendationScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // ai banner
-                Box(
+                DiscoveryWidgetsRow(
+                    onAiHelperClick = { onAiAssistantClick() },
+                    onChallengesClick = { onNavigateToChallenges() } // Переход на новый экран челленджей!
+                )
+                /*Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(80.dp)
@@ -120,7 +126,7 @@ fun RecommendationScreen(
                             )
                         }
                     }
-                }
+                }*/
             }
         },
 
