@@ -5,12 +5,15 @@ import com.vdggrtf.playlog.data.local.dao.GameDao
 import com.vdggrtf.playlog.data.local.entity.DB_NAME
 import com.vdggrtf.playlog.data.mapper.toDomainModel
 import com.vdggrtf.playlog.data.mapper.toEntity
+import com.vdggrtf.playlog.data.network.dto.BountyRewardDto
+import com.vdggrtf.playlog.data.network.dto.CompletedBountyDto
 import com.vdggrtf.playlog.data.network.dto.SupabaseGameDto
 import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.domain.repository.LibraryRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -108,6 +111,37 @@ class LibraryRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getTotalBounty(): Int {
+        return try {
+            // Get IDs of completed challenges
+            val completedRecords = supabase.from("user_challenge_status")
+                .select(columns = Columns.list("challenge_id")) {
+                    filter {
+                        eq("status", "COMPLETED")
+                    }
+                }.decodeList<CompletedBountyDto>()
+
+            val ids = completedRecords.map { it.challengeId }
+
+            if (ids.isEmpty()) return 0
+
+            // Fetch the actual reward points for these challenges
+            // Supabase trick: using 'in' filter to get multiple rows by ID
+            val rewards = supabase.from("custom_challenge")
+                .select(columns = Columns.list("reward_points")) {
+                    filter {
+                        isIn("id", ids)
+                    }
+                }.decodeList<BountyRewardDto>()
+
+            // Math time!
+            val total = rewards.sumOf { it.rewardPoints }
+            return total
+        } catch (e: Exception) {
+            Log.e("ProfileVM", "Ошибка подсчета Bounty: ${e.message}")
+            0
+        }
+    }
 
     override suspend fun clearLocalDatabase() {
         withContext(Dispatchers.IO) {

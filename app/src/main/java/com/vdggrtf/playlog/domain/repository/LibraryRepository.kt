@@ -13,5 +13,7 @@ interface LibraryRepository {
 
     suspend fun getLocalGameById(id: Int): GameModel?
 
+    suspend fun getTotalBounty(): Int
+
     suspend fun clearLocalDatabase()
 }

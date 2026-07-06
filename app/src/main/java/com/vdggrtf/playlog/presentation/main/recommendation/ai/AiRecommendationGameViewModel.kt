@@ -5,6 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.domain.repository.AiRepository
 import com.vdggrtf.playlog.domain.repository.GameRepository
+import com.vdggrtf.playlog.domain.usecase.GetAiRecommendationsWithDetailsUseCase
+import com.vdggrtf.playlog.domain.usecase.GetGameRecommendationAiUseCase
+import com.vdggrtf.playlog.domain.usecase.SearchGamesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -28,8 +31,7 @@ data class AiGameState(
 
 @HiltViewModel
 class AiRecommendationGameViewModel @Inject constructor(
-    private val repository: GameRepository,
-    private val aiRepository: AiRepository,
+    private val getAiRecommendationsWithDetailsUseCase: GetAiRecommendationsWithDetailsUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AiGameState())
@@ -41,41 +43,16 @@ class AiRecommendationGameViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null, recommendations = emptyList()) }
 
-            try {
-                val aiList = aiRepository.getGameRecommendation(userPrompt)
+            val result = getAiRecommendationsWithDetailsUseCase(userPrompt)
 
-                if (aiList.isEmpty()) {
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            error = "No recommendations found",
-                            recommendations = emptyList()
-                        )
-                    }
-
-                    return@launch
+            result.fold(
+                onSuccess = { games ->
+                    _state.update { it.copy(isLoading = false, recommendations = games) }
+                },
+                onFailure = {error ->
+                    _state.update { it.copy(error = error.message, isLoading = false) }
                 }
-
-                coroutineScope {
-                    val gamesWithDetails = aiList.map { aiGameRecommendation ->
-                        async {
-
-
-                            val searchResult = repository.searchGames(aiGameRecommendation.gameName)
-                            val realGame = searchResult.getOrNull()?.firstOrNull()
-
-                            AiRecommendedGame(
-                                aiReason = aiGameRecommendation.reason,
-                                gameDetails = realGame
-                            )
-                        }
-                    }.awaitAll()
-
-                    _state.update { it.copy(isLoading = false, recommendations = gamesWithDetails) }
-                }
-            } catch (e: Exception) {
-                _state.update { it.copy(isLoading = false, error = "System error ${e.message}") }
-            }
+            )
         }
     }
 }

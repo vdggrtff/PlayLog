@@ -157,4 +157,17 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun isUserSessionActive(): Boolean {
+        return try {
+            //Wait for Supabase to refresh tokens from local storage
+            supabase.auth.awaitInitialization()
+
+            // Check if a session exists
+            supabase.auth.currentSessionOrNull() != null
+        } catch (e: Exception){
+            Log.e("AuthRepository", "Auth init error: ${e.message}")
+            // OFFLINE FALLBACK
+            supabase.auth.currentSessionOrNull() != null
+        }
+    }
 }
