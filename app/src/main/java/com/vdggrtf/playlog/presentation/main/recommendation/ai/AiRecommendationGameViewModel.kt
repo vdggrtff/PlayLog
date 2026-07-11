@@ -3,15 +3,8 @@ package com.vdggrtf.playlog.presentation.main.recommendation.ai
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vdggrtf.playlog.domain.model.GameModel
-import com.vdggrtf.playlog.domain.repository.AiRepository
-import com.vdggrtf.playlog.domain.repository.GameRepository
-import com.vdggrtf.playlog.domain.usecase.GetAiRecommendationsWithDetailsUseCase
-import com.vdggrtf.playlog.domain.usecase.GetGameRecommendationAiUseCase
-import com.vdggrtf.playlog.domain.usecase.SearchGamesUseCase
+import com.vdggrtf.playlog.domain.usecase.ai.GetAiRecommendationsWithDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

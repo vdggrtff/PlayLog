@@ -1,4 +1,4 @@
-package com.vdggrtf.playlog.domain.usecase
+package com.vdggrtf.playlog.domain.usecase.search
 
 import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.domain.repository.GameRepository

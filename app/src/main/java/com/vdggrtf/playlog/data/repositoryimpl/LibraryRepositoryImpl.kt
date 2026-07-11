@@ -111,6 +111,22 @@ class LibraryRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getCommunityDifficulties(gameId: Int): Result<List<String>> {
+        return try {
+            val votes = supabase.from("games_library")
+                .select {
+                    filter {
+                        eq("game_id_rawg", gameId)
+                        neq("user_difficulty", "NONE")
+                    }
+                }.decodeList<SupabaseGameDto>()
+
+            Result.success(votes.map { it.userDifficulty })
+        }catch (e: Exception){
+            Result.failure(e)
+        }
+    }
+
     override suspend fun getTotalBounty(): Int {
         return try {
             // Get IDs of completed challenges

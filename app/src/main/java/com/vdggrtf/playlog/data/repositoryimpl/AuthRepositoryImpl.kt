@@ -170,4 +170,26 @@ class AuthRepositoryImpl @Inject constructor(
             supabase.auth.currentSessionOrNull() != null
         }
     }
+
+    override suspend fun syncUserProfile() {
+        val user = supabase.auth.currentUserOrNull()
+        if (user != null) {
+            val cloudName = user.userMetadata?.get("name")?.toString()?.replace("\"", "")
+            val userEmail = user.email ?: ""
+
+            if (!cloudName.isNullOrBlank()){
+                userStorage.saveUserData(cloudName, userEmail)
+            }
+        }
+    }
+
+    override suspend fun logout() {
+        try {
+            supabase.auth.signOut()
+        } catch (e: Exception){
+            Log.e("AuthRepository", "Ошибка выхода на сервере: ${e.message}")
+        } finally {
+            userStorage.clearStorage()
+        }
+    }
 }

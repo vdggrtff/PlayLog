@@ -3,11 +3,9 @@ package com.vdggrtf.playlog.presentation.splash
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.vdggrtf.playlog.domain.usecase.CheckUserSessionUseCase
+import com.vdggrtf.playlog.domain.usecase.splash.CheckUserSessionUseCase
 import com.vdggrtf.playlog.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.gotrue.auth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

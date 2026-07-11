@@ -1,7 +1,5 @@
-package com.vdggrtf.playlog.domain.usecase
+package com.vdggrtf.playlog.domain.usecase.ai
 
-import androidx.room.Query
-import com.vdggrtf.playlog.domain.model.AiGameRecommendation
 import com.vdggrtf.playlog.domain.repository.AiRepository
 import com.vdggrtf.playlog.domain.repository.GameRepository
 import com.vdggrtf.playlog.presentation.main.recommendation.ai.AiRecommendedGame

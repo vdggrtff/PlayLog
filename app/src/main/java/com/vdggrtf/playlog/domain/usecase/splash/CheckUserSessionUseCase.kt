@@ -1,4 +1,4 @@
-package com.vdggrtf.playlog.domain.usecase
+package com.vdggrtf.playlog.domain.usecase.splash
 
 import com.vdggrtf.playlog.domain.repository.AuthRepository
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package com.vdggrtf.playlog.domain.usecase
+package com.vdggrtf.playlog.domain.usecase.ai
 
 import com.vdggrtf.playlog.domain.model.AiGameRecommendation
 import com.vdggrtf.playlog.domain.repository.AiRepository

@@ -2,9 +2,11 @@ package com.vdggrtf.playlog.data.repositoryimpl
 
 import android.util.Log
 import com.vdggrtf.playlog.data.mapper.toDomainModel
+import com.vdggrtf.playlog.data.network.api.CheapSharkApi
 import com.vdggrtf.playlog.data.network.api.RawgApi
 import com.vdggrtf.playlog.data.network.dto.AchievementDto
 import com.vdggrtf.playlog.data.network.dto.CashedGameDto
+import com.vdggrtf.playlog.data.network.dto.CheapSharkDealDto
 import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.domain.repository.GameRepository
 import com.vdggrtf.playlog.utils.NetworkResult
@@ -13,12 +15,14 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class GameRepositoryImpl @Inject constructor(
     private val api: RawgApi,
     private val supabase: SupabaseClient,
+    private val cheapSharkApi: CheapSharkApi,
 ) : GameRepository {
 
     override suspend fun searchGames(query: String, page: Int): Result<List<GameModel>> {
@@ -181,6 +185,22 @@ class GameRepositoryImpl @Inject constructor(
             }
         }
 
+
+
         return Result.success(allAchievement)
+    }
+
+    override suspend fun getGamePrices(gameName: String): Result<List<CheapSharkDealDto>> {
+        return try {
+            val response = cheapSharkApi.getStoreSpecificDeals(gameName)
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("API Error"))
+            }
+        } catch (e: Exception) {
+            Log.e("SHARK", "Акула не ответила: ${e.message}")
+            Result.failure(e)
+        }
     }
 }

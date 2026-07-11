@@ -3,8 +3,7 @@ package com.vdggrtf.playlog.presentation.main.recommendation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vdggrtf.playlog.domain.model.GameModel
-import com.vdggrtf.playlog.domain.repository.GameRepository
-import com.vdggrtf.playlog.domain.usecase.GetPopularGamesUseCase
+import com.vdggrtf.playlog.domain.usecase.recommendation.GetPopularGamesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

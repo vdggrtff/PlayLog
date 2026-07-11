@@ -1,4 +1,4 @@
-package com.vdggrtf.playlog.domain.usecase
+package com.vdggrtf.playlog.domain.usecase.profile
 
 import com.vdggrtf.playlog.domain.repository.LibraryRepository
 import javax.inject.Inject
