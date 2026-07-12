@@ -42,6 +42,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vdggrtf.playlog.R
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
+import com.vdggrtf.playlog.domain.model.GameStatus
 import com.vdggrtf.playlog.presentation.components.list.GamesListTemplate
 import com.vdggrtf.playlog.presentation.components.mylibrary.FairyHintWithArrow
 import com.vdggrtf.playlog.presentation.components.mylibrary.LibraryHeader
@@ -51,26 +52,20 @@ import com.vdggrtf.playlog.ui.theme.PrimaryPurple
 import com.vdggrtf.playlog.ui.theme.bgColor
 import java.io.ByteArrayOutputStream
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LibraryScreen(
+fun LibraryRoute(
     onGameClick: (String) -> Unit,
     onNavigateToSearch: () -> Unit,
+    libraryViewModel: MyLibraryViewModel = hiltViewModel(),
+    scannerViewModel: ScannerViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
-    val libraryViewModel: MyLibraryViewModel = hiltViewModel()
     val state by libraryViewModel.state.collectAsState()
     val selectedStatus by libraryViewModel.selectedStatus.collectAsState()
-    val scannerViewModel: ScannerViewModel = hiltViewModel()
+    val selectedDiffFilter by libraryViewModel.selectedDifficultyFilter.collectAsState()
     val scannerStatus by scannerViewModel.statusText.collectAsState()
 
-    var showAddMenu by remember { mutableStateOf(false) }
-    val selectedDiffFilter by libraryViewModel.selectedDifficultyFilter.collectAsState()
-
-    val difficultyFilters = AchievementDifficulty.entries
-        .filter { it != AchievementDifficulty.NONE }
-        .map { it.title.uppercase() }
-
+    // 💥 GALLERY LAUNCHER LIVES IN THE ROUTE
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
@@ -83,17 +78,52 @@ fun LibraryScreen(
             }
 
             val stream = ByteArrayOutputStream()
-
             bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
-            val biteArray = stream.toByteArray()
+            val byteArray = stream.toByteArray()
 
-            scannerViewModel.scanAndImportLibrary(biteArray)
+            scannerViewModel.scanAndImportLibrary(byteArray)
         }
     }
 
+    // CALLING THE DUMB SCREEN
+    LibraryScreen(
+        state = state,
+        selectedStatus = selectedStatus,
+        selectedDiffFilter = selectedDiffFilter,
+        scannerStatus = scannerStatus,
+        onGameClick = onGameClick,
+        onNavigateToSearch = onNavigateToSearch,
+        onLaunchScanner = { galleryLauncher.launch("image/*") },
+        onClearScanner = { scannerViewModel.clearStatus() },
+        onFilterStatusChanged = { libraryViewModel.setFilterStatus(it) },
+        onFilterDifficultyChanged = { diff -> libraryViewModel.toggleDifficultyFilter(diff) }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LibraryScreen(
+    state: LibraryState,
+    selectedStatus: GameStatus,
+    selectedDiffFilter: AchievementDifficulty?,
+    scannerStatus: String?,
+    onGameClick: (String) -> Unit,
+    onNavigateToSearch: () -> Unit,
+    onLaunchScanner: () -> Unit,
+    onClearScanner: () -> Unit,
+    onFilterStatusChanged: (GameStatus) -> Unit,
+    onFilterDifficultyChanged: (AchievementDifficulty) -> Unit,
+) {
+    var showAddMenu by remember { mutableStateOf(false) }
+
+    val difficultyFilters = AchievementDifficulty.entries
+        .filter { it != AchievementDifficulty.NONE }
+        .map { it.title.uppercase() }
+
+
     // scanner dialog (find and add game or not)
     if (scannerStatus != null) {
-        Dialog(onDismissRequest = { scannerViewModel.clearStatus() }) {
+        Dialog(onDismissRequest = onClearScanner) {
             Surface(
                 shape = RoundedCornerShape(16.dp),
                 color = com.vdggrtf.playlog.ui.theme.CardBackground,
@@ -115,7 +145,7 @@ fun LibraryScreen(
                     )
                     if (scannerStatus!!.startsWith("✅") || scannerStatus!!.startsWith("❌")) {
                         Spacer(Modifier.height(16.dp))
-                        androidx.compose.material3.TextButton(onClick = { scannerViewModel.clearStatus() }) {
+                        androidx.compose.material3.TextButton(onClick = onClearScanner) {
                             Text(
                                 stringResource(R.string.close_library_screen),
                                 color = PrimaryPurple
@@ -136,7 +166,10 @@ fun LibraryScreen(
                 // showing two options (AI and Manual)
                 if (showAddMenu) {
                     FloatingActionButton(
-                        onClick = { showAddMenu = false; galleryLauncher.launch("image/*") },
+                        onClick = {
+                            showAddMenu = false
+                            onLaunchScanner()
+                        },
                         containerColor = AiAccent,
                         modifier = Modifier.padding(bottom = 8.dp)
                     ) {
@@ -181,7 +214,7 @@ fun LibraryScreen(
                 val diffEnum =
                     AchievementDifficulty.entries.find { it.title.uppercase() == filterName }
                 if (diffEnum != null) {
-                    libraryViewModel.toggleDifficultyFilter(diffEnum)
+                    onFilterDifficultyChanged(diffEnum)
                 }
             },
             headerContent = {
@@ -198,7 +231,7 @@ fun LibraryScreen(
                     LibraryHeader(
                         allGames = state.games,
                         selectedStatus = selectedStatus,
-                        onStatusSelected = { libraryViewModel.setFilterStatus(it) }
+                        onStatusSelected = onFilterStatusChanged
                     )
                 }
             },

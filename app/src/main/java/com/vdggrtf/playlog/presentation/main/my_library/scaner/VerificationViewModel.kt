@@ -42,7 +42,7 @@ class VerificationViewModel @Inject constructor(
                         _state.update {
                             it.copy(
                                 isThinking = false,
-                                error = "Скриншот не подтвержден! Загрузите четкое фото 100% комплита."
+                                error = "Screenshot is not approved! Download clear picture 100% completed."
                             )
                         }
                     }

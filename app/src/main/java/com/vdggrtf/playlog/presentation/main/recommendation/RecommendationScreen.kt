@@ -27,30 +27,54 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vdggrtf.playlog.R
 import com.vdggrtf.playlog.presentation.components.list.GamesListTemplate
 import com.vdggrtf.playlog.presentation.components.tabs.DiscoveryWidgetsRow
-import com.vdggrtf.playlog.ui.theme.AiAccent
-import com.vdggrtf.playlog.ui.theme.AiGradient
-import com.vdggrtf.playlog.ui.theme.Background
 import com.vdggrtf.playlog.ui.theme.CardBackground
 
 @Composable
-fun RecommendationScreen(
+fun RecommendationRoute(
     onGameClick: (String) -> Unit,
     onSearchClick: () -> Unit,
     onAiAssistantClick: () -> Unit,
-    onNavigateToChallenges: () -> Unit
+    onNavigateToChallenges: () -> Unit,
+    viewModel: RecommendationViewModel = hiltViewModel(),
 ) {
-    val viewModel: RecommendationViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
 
     val genreFilters = listOf("Action", "RPG", "Shooter", "Adventure", "Indie")
     var selectedGenre by remember { mutableStateOf("Action") }
+
+
+    RecommendationScreen(
+        state = state,
+        onGameClick = { onGameClick(it) },
+        onSearchClick = onSearchClick,
+        onAiAssistantClick = onAiAssistantClick,
+        onNavigateToChallenges = onNavigateToChallenges,
+        genreFilters = genreFilters,
+        selectedGenre = selectedGenre,
+        onFilterClick = { selectedGenre = it },
+        onLoadMore = { viewModel.loadMoreGames() }
+
+    )
+}
+
+@Composable
+fun RecommendationScreen(
+    state: RecommendationState,
+    genreFilters: List<String>,
+    selectedGenre: String,
+    onLoadMore: () -> Unit,
+    onFilterClick: (String) -> Unit,
+    onGameClick: (String) -> Unit,
+    onSearchClick: () -> Unit,
+    onAiAssistantClick: () -> Unit,
+    onNavigateToChallenges: () -> Unit,
+) {
 
     GamesListTemplate(
         title = "Recommendation",
@@ -60,9 +84,7 @@ fun RecommendationScreen(
         // Genre
         filters = genreFilters,
         selectedFilter = selectedGenre,
-        onFilterClick = { genre ->
-            selectedGenre = genre
-        },
+        onFilterClick = onFilterClick,
 
         // Header With Ai
         headerContent = {
@@ -82,7 +104,11 @@ fun RecommendationScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray)
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text(stringResource(R.string.find_game), color = Color.Gray, fontSize = 16.sp)
+                        Text(
+                            stringResource(R.string.find_game),
+                            color = Color.Gray,
+                            fontSize = 16.sp
+                        )
                     }
                 }
 
@@ -93,40 +119,6 @@ fun RecommendationScreen(
                     onAiHelperClick = { onAiAssistantClick() },
                     onChallengesClick = { onNavigateToChallenges() } // Переход на новый экран челленджей!
                 )
-                /*Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(80.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(AiGradient)
-                        .clickable { onAiAssistantClick() }
-                        .padding(2.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Background)
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("✨", fontSize = 28.sp)
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column {
-                            Text(
-                                stringResource(R.string.ai_helper),
-                                color = AiAccent,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            )
-                            Text(
-                                stringResource(R.string.don_t_know_what_to_play),
-                                color = Color.LightGray,
-                                fontSize = 12.sp
-                            )
-                        }
-                    }
-                }*/
             }
         },
 
@@ -138,6 +130,6 @@ fun RecommendationScreen(
 
         onBack = null,
         onGameClick = onGameClick,
-        onLoadMore = { viewModel.loadMoreGames() }
+        onLoadMore = onLoadMore
     )
 }

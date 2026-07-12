@@ -5,7 +5,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -54,9 +53,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vdggrtf.playlog.R
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
+import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.domain.model.GameStatus
 import com.vdggrtf.playlog.presentation.components.card.ExpandableDifficultySection
 import com.vdggrtf.playlog.presentation.components.card_details.AchievementRow
@@ -72,21 +71,18 @@ import com.vdggrtf.playlog.ui.theme.Background
 import com.vdggrtf.playlog.ui.theme.CardBackground
 import com.vdggrtf.playlog.ui.theme.PrimaryPurple
 
-
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun GameDetailsScreen(
+fun GameDetailsRoute(
     onBackClick: () -> Unit,
+    gameViewModel: GameDetailsViewModel = hiltViewModel(),
+    verificationViewModel: VerificationViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
-    val viewModel: GameDetailsViewModel = hiltViewModel()
-    val state by viewModel.state.collectAsState()
-    var selectedTab by remember { mutableIntStateOf(0) }
-    var showBottomBar by remember { mutableStateOf(false) }
-    val verificationViewModel: VerificationViewModel = hiltViewModel()
+    val gameState by gameViewModel.state.collectAsState()
     val verificationState by verificationViewModel.state.collectAsState()
 
-    if (state.isLoading) {
+
+    if (gameState.isLoading) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -98,7 +94,7 @@ fun GameDetailsScreen(
         return
     }
 
-    val game = state.game ?: return
+    val game = gameState.game ?: return
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -108,11 +104,11 @@ fun GameDetailsScreen(
                 stream.readBytes()
             }
             if (imageBytes != null) {
-                state.game?.let { currentGame ->
+                gameState.game?.let { currentGame ->
                     verificationViewModel.verifyAndCompleteGame(
                         imageBytes = imageBytes,
                         game = currentGame,
-                        aiDifficulty = state.objectiveDifficulty
+                        aiDifficulty = gameState.objectiveDifficulty
                     )
                 }
             }
@@ -161,18 +157,42 @@ fun GameDetailsScreen(
     // dialog ai success
     if (verificationState.isSuccess) {
         UserRatingDialog(
-            aiDifficulty = state.objectiveDifficulty,
+            aiDifficulty = gameState.objectiveDifficulty,
             onRate = { selectedDiff ->
-                viewModel.completeGameWithUserRating(selectedDiff)
+                gameViewModel.completeGameWithUserRating(selectedDiff)
 
                 verificationViewModel.resetSuccessState()
             },
             onSkip = {
-                viewModel.completeGameWithUserRating(AchievementDifficulty.NONE)
+                gameViewModel.completeGameWithUserRating(AchievementDifficulty.NONE)
                 verificationViewModel.resetSuccessState()
             }
         )
     }
+
+    GameDetailsScreen(
+        gameState = gameState,
+        game = game,
+        onBackClick = onBackClick,
+        onProveClick = { galleryLauncher.launch("image/*") }, // Команда открыть галерею
+        onRetryAiClick = { gameViewModel.retryAiEvaluation() }, // Команда перепнуть ИИ
+        onUpdateStatus = { newStatus -> gameViewModel.updateCurrentStatus(newStatus) }
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@Composable
+fun GameDetailsScreen(
+    gameState: GameDetailsState,
+    game: GameModel,
+    onBackClick: () -> Unit,
+    onProveClick: () -> Unit,
+    onRetryAiClick: () -> Unit,
+    onUpdateStatus: (GameStatus) -> Unit,
+) {
+
+    var selectedTab by remember { mutableIntStateOf(0) }
+    var showBottomBar by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = Background,
@@ -180,16 +200,16 @@ fun GameDetailsScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { showBottomBar = true },
-                containerColor = if (state.isSavedLibrary) Color(0xFF4CAF50) else PrimaryPurple,
+                containerColor = if (gameState.isSavedLibrary) Color(0xFF4CAF50) else PrimaryPurple,
                 contentColor = Color.White
             ) {
                 Icon(
-                    if (state.isSavedLibrary) Icons.Default.Edit else Icons.Default.Add,
+                    if (gameState.isSavedLibrary) Icons.Default.Edit else Icons.Default.Add,
                     contentDescription = null
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (state.isSavedLibrary) stringResource(R.string.in_library) else stringResource(
+                    text = if (gameState.isSavedLibrary) stringResource(R.string.in_library) else stringResource(
                         R.string.add
                     ),
                     fontWeight = FontWeight.Bold
@@ -197,97 +217,97 @@ fun GameDetailsScreen(
             }
         }
     ) { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(bottom = 100.dp)
-            ) {
-                //  HEADER
-                item {
-                    Box { // We wrap Header and Back Button in a Box inside the list!
-                        GameHeaderSection(state)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentPadding = PaddingValues(bottom = 100.dp)
+        ) {
+            //  HEADER
+            item {
+                Box { // We wrap Header and Back Button in a Box inside the list!
+                    GameHeaderSection(gameState)
 
-                        // FIX 3: Back button is now INSIDE the scrollable list.
-                        // It will scroll up and disappear when user scrolls down to read text.
-                        IconButton(
-                            onClick = onBackClick,
-                            modifier = Modifier
-                                .padding(top = 40.dp, start = 16.dp) // Offset for status bar
-                                .background(Color.Black.copy(alpha = 0.5f), CircleShape)
-                        ) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back),
-                                tint = Color.White
-                            )
-                        }
-                    }
-                }
-
-                item {
-                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        StoreLinksRow(
-                            gameName = game.name,
-                            cheapestPrice = state.cheapestPrice,
+                    // FIX 3: Back button is now INSIDE the scrollable list.
+                    // It will scroll up and disappear when user scrolls down to read text.
+                    IconButton(
+                        onClick = onBackClick,
+                        modifier = Modifier
+                            .padding(top = 40.dp, start = 16.dp) // Offset for status bar
+                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = Color.White
                         )
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        // Ai block
-                        ExpandableDifficultySection(
-                            aiDifficulty = state.objectiveDifficulty,
-                            userDifficulty = game.userDifficulty,
-                            isAiThinking = state.isAiThinking,
-                            isGameInLibrary = state.isSavedLibrary,
-                            currentGameStatus = state.currentGameStatus,
-                            onProveClick = { galleryLauncher.launch("image/*") },
-                            onRetryClick = { viewModel.retryAiEvaluation() },
-                            communityDifficulty = state.communityDifficulty,
-                            communityVotesCount = state.communityVotesCount
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-                    }
-                }
-
-                //  TABS
-                item {
-                    CyberTabs(
-                        selectedTabIndex = selectedTab,
-                        onTabSelected = { selectedTab = it },
-                        achievementsCount = state.achievements.size
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                // TAB content
-                if (selectedTab == 0) {
-                    item {
-                        ExpandableDescription(
-                            text = game.descriptionRaw
-                                ?: stringResource(R.string.description_is_out)
-                        )
-                    }
-                } else {
-                    if (state.achievements.isEmpty()) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(32.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(stringResource(R.string.no_achievements), color = Color.Gray)
-                            }
-                        }
-                    } else {
-                        items(state.achievements) { ach -> AchievementRow(ach) }
                     }
                 }
             }
+
+            item {
+                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    StoreLinksRow(
+                        gameName = game.name,
+                        cheapestPrice = gameState.cheapestPrice,
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Ai block
+                    ExpandableDifficultySection(
+                        aiDifficulty = gameState.objectiveDifficulty,
+                        userDifficulty = game.userDifficulty,
+                        isAiThinking = gameState.isAiThinking,
+                        isGameInLibrary = gameState.isSavedLibrary,
+                        currentGameStatus = gameState.currentGameStatus,
+                        onProveClick = onProveClick,
+                        onRetryClick = onRetryAiClick,
+                        communityDifficulty = gameState.communityDifficulty,
+                        communityVotesCount = gameState.communityVotesCount
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+            }
+
+            //  TABS
+            item {
+                CyberTabs(
+                    selectedTabIndex = selectedTab,
+                    onTabSelected = { selectedTab = it },
+                    achievementsCount = gameState.achievements.size
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // TAB content
+            if (selectedTab == 0) {
+                item {
+                    ExpandableDescription(
+                        text = game.descriptionRaw
+                            ?: stringResource(R.string.description_is_out)
+                    )
+                }
+            } else {
+                if (gameState.achievements.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(stringResource(R.string.no_achievements), color = Color.Gray)
+                        }
+                    }
+                } else {
+                    items(gameState.achievements) { ach -> AchievementRow(ach) }
+                }
+            }
         }
+    }
 
     // Bottom sheet (Game walkthrough selection)
     if (showBottomBar) {
@@ -309,7 +329,7 @@ fun GameDetailsScreen(
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                if (state.currentGameStatus == GameStatus.COMPLETED) {
+                if (gameState.currentGameStatus == GameStatus.COMPLETED) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -328,25 +348,25 @@ fun GameDetailsScreen(
                 } else {
                     StatusOptionRow(
                         stringResource(R.string.backlog_game_details),
-                        state.currentGameStatus == GameStatus.BACKLOG
+                        gameState.currentGameStatus == GameStatus.BACKLOG
                     ) {
-                        viewModel.updateCurrentStatus(GameStatus.BACKLOG)
+                        onUpdateStatus(GameStatus.BACKLOG)
                         showBottomBar = false
                     }
                     StatusOptionRow(
                         stringResource(R.string.playing_game_details),
-                        state.currentGameStatus == GameStatus.PLAYING
+                        gameState.currentGameStatus == GameStatus.PLAYING
                     ) {
-                        viewModel.updateCurrentStatus(GameStatus.PLAYING)
+                        onUpdateStatus(GameStatus.PLAYING)
                         showBottomBar = false
                     }
 
-                    if (state.isSavedLibrary) {
+                    if (gameState.isSavedLibrary) {
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = {
                                 showBottomBar = false
-                                galleryLauncher.launch("image/*")
+                                onProveClick()
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -368,14 +388,14 @@ fun GameDetailsScreen(
                     }
                 }
 
-                if (state.isSavedLibrary) {
+                if (gameState.isSavedLibrary) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Divider(color = Color.DarkGray)
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Button(
                         onClick = {
-                            viewModel.updateCurrentStatus(GameStatus.NONE)
+                            onUpdateStatus(GameStatus.NONE)
                             showBottomBar = false
                         },
                         modifier = Modifier

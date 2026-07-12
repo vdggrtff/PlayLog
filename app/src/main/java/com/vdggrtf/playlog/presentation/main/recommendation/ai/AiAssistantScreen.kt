@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -51,18 +52,40 @@ import com.vdggrtf.playlog.ui.theme.AiGradient
 import com.vdggrtf.playlog.ui.theme.bgColor
 import com.vdggrtf.playlog.ui.theme.cardColor
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AiAssistantScreen(
+fun AiAssistantRoute(
     onBackClick: () -> Unit,
     onGameClick: (String) -> Unit,
+    viewModel: AiRecommendationGameViewModel = hiltViewModel()
 ) {
-    val viewModel: AiRecommendationGameViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
+
     var promptText by remember { mutableStateOf("") }
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    AiAssistantScreen(
+        state = state,
+        promptText = promptText,
+        onBackClick = onBackClick,
+        onGameClick = onGameClick,
+        onValueChange = { promptText = it},
+        keyboardController = keyboardController,
+        onAskAi = { viewModel.askAiForRecommendations(promptText)}
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AiAssistantScreen(
+    state: AiGameState,
+    promptText: String,
+    keyboardController: SoftwareKeyboardController?,
+    onAskAi: () -> Unit,
+    onValueChange: (String) -> Unit,
+    onBackClick: () -> Unit,
+    onGameClick: (String) -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -181,7 +204,7 @@ fun AiAssistantScreen(
             ) {
                 OutlinedTextField(
                     value = promptText,
-                    onValueChange = { promptText = it },
+                    onValueChange = onValueChange,
                     placeholder = {
                         Text(
                             stringResource(R.string.describe_the_game),
@@ -208,7 +231,7 @@ fun AiAssistantScreen(
                         .background(AiGradient, CircleShape)
                         .clickable(enabled = promptText.isNotBlank() && !state.isLoading) {
                             keyboardController?.hide()
-                            viewModel.askAiForRecommendations(promptText)
+                            onAskAi()
                         },
                     contentAlignment = Alignment.Center
                 ) {

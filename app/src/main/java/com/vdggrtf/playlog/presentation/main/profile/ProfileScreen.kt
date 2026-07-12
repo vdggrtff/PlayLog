@@ -55,15 +55,15 @@ import com.vdggrtf.playlog.presentation.components.profile.GamerPassportUi
 import com.vdggrtf.playlog.presentation.dialogs.PassportShareDialog
 import com.vdggrtf.playlog.ui.theme.Background
 
-@Composable
-fun ProfileScreen(
-    onLogoutSuccess: () -> Unit,
-) {
-    val context = LocalContext.current
-    val viewModel: ProfileViewModel = hiltViewModel()
-    val state by viewModel.state.collectAsState()
 
-    var showPassportDialog by remember { mutableStateOf(false) }
+// 1. SMART ROUTE: Handles ViewModel, Context, Intents and Navigation
+@Composable
+fun ProfileRoute(
+    onLogoutSuccess: () -> Unit,
+    viewModel: ProfileViewModel = hiltViewModel()
+) {
+    val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
 
     // Redirect to login if user logged out
     LaunchedEffect(state.isLoggedOut) {
@@ -72,6 +72,30 @@ fun ProfileScreen(
             onLogoutSuccess()
         }
     }
+
+    // Launch Boosty intent
+    val onDonateClick = {
+        val donateUrl = "https://boosty.to/playlog_app/donate"
+        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(donateUrl)))
+    }
+
+    ProfileScreen(
+        state = state,
+        onLogoutClick = { viewModel.logout() },
+        onDonateClick = onDonateClick
+    )
+}
+
+
+// 2. DUMB SCREEN: Pure UI, completely stateless!
+@Composable
+fun ProfileScreen(
+    state: ProfileState,
+    onLogoutClick: () -> Unit,
+    onDonateClick: () -> Unit
+) {
+    // Local UI state for dialog is perfectly fine to keep in the dumb screen
+    var showPassportDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -109,8 +133,7 @@ fun ProfileScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // GAMER PASSPORT (Replaces standard avatar and info)
-        // Feeding REAL data from ViewModel state!
+        // GAMER PASSPORT
         GamerPassportUi(
             nickname = state.name,
             totalGames = state.totalGames,
@@ -122,12 +145,9 @@ fun ProfileScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Donate button (pls)
+        // DONATE BUTTON
         Button(
-            onClick = {
-                val donateUrl = "https://boosty.to/playlog_app/donate"
-                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(donateUrl)))
-            },
+            onClick = onDonateClick, // Passed from Route
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -165,7 +185,7 @@ fun ProfileScreen(
 
         // LOGOUT BUTTON
         Button(
-            onClick = { viewModel.logout() },
+            onClick = onLogoutClick, // Passed from Route
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -189,7 +209,7 @@ fun ProfileScreen(
         Spacer(modifier = Modifier.height(100.dp)) // Margin for Bottom Bar
     }
 
-    // DIALOG FOR SHARING (Capturable)
+    // DIALOG FOR SHARING
     if (showPassportDialog) {
         PassportShareDialog(
             nickname = state.name,

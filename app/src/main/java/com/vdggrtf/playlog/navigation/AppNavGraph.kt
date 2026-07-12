@@ -13,17 +13,24 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.vdggrtf.playlog.presentation.auth.login.LoginScreen
 import com.vdggrtf.playlog.presentation.auth.registrartion.RegistrationScreen
+import com.vdggrtf.playlog.presentation.main.achieve_hunting_screen.AchievementsRoute
 import com.vdggrtf.playlog.presentation.main.achieve_hunting_screen.AchievementsScreen
+import com.vdggrtf.playlog.presentation.main.achieve_hunting_screen.difficulty_games_screen.DifficultyGamesRoute
 import com.vdggrtf.playlog.presentation.main.achieve_hunting_screen.difficulty_games_screen.DifficultyGamesScreen
+import com.vdggrtf.playlog.presentation.main.game_details.GameDetailsRoute
 import com.vdggrtf.playlog.presentation.main.game_details.GameDetailsScreen
-import com.vdggrtf.playlog.presentation.main.recommendation.custom_challenges.challenge.ChallengeDetailsRoute
+import com.vdggrtf.playlog.presentation.main.my_library.LibraryRoute
 import com.vdggrtf.playlog.presentation.main.my_library.LibraryScreen
-import com.vdggrtf.playlog.presentation.main.profile.ProfileScreen
+import com.vdggrtf.playlog.presentation.main.profile.ProfileRoute
+import com.vdggrtf.playlog.presentation.main.recommendation.RecommendationRoute
 import com.vdggrtf.playlog.presentation.main.recommendation.RecommendationScreen
+import com.vdggrtf.playlog.presentation.main.recommendation.ai.AiAssistantRoute
 import com.vdggrtf.playlog.presentation.main.recommendation.ai.AiAssistantScreen
 import com.vdggrtf.playlog.presentation.main.recommendation.custom_challenges.ChallengeBoardRoute
+import com.vdggrtf.playlog.presentation.main.recommendation.custom_challenges.challenge.ChallengeDetailsRoute
+import com.vdggrtf.playlog.presentation.main.recommendation.search.SearchRoute
 import com.vdggrtf.playlog.presentation.main.recommendation.search.SearchScreen
-import com.vdggrtf.playlog.presentation.splash.SplashScreen
+import com.vdggrtf.playlog.presentation.splash.SplashRoute
 
 @Composable
 fun AppNavGraph(navController: NavHostController) {
@@ -55,7 +62,7 @@ fun AppNavGraph(navController: NavHostController) {
         }
     ) {
         composable(Screen.SplashScreen.route) {
-            SplashScreen(onNavigate = { route ->
+            SplashRoute(onNavigate = { route ->
                 navController.navigate(route) {
                     popUpTo(Screen.SplashScreen.route) { inclusive = true }
                 }
@@ -80,11 +87,11 @@ fun AppNavGraph(navController: NavHostController) {
                 })
         }
         composable(route = Screen.RecommendationScreen.route) {
-            RecommendationScreen(
+            RecommendationRoute(
                 onSearchClick = { navController.navigate(Screen.SearchScreen.route) },
                 onGameClick = { gameId -> navController.navigate("details/$gameId") },
                 onAiAssistantClick = { navController.navigate(Screen.AiRecommendationScreen.route) },
-                onNavigateToChallenges = {navController.navigate(Screen.CustomChallengesScreen.route)}
+                onNavigateToChallenges = { navController.navigate(Screen.CustomChallengesScreen.route) }
             )
         }
         composable(route = Screen.CustomChallengesScreen.route) {
@@ -109,7 +116,7 @@ fun AppNavGraph(navController: NavHostController) {
             )
         }
         composable(route = Screen.SearchScreen.route) {
-            SearchScreen(
+            SearchRoute(
                 onBack = { navController.popBackStack() },
                 onGameClick = { gameId -> navController.navigate("details/$gameId") })
         }
@@ -117,10 +124,10 @@ fun AppNavGraph(navController: NavHostController) {
             route = "details/{gameId}",
             arguments = listOf(navArgument("gameId") { type = NavType.IntType })
         ) {
-            GameDetailsScreen { navController.popBackStack() }
+            GameDetailsRoute (onBackClick = { navController.popBackStack() })
         }
         composable(route = Screen.LibraryScreen.route) {
-            LibraryScreen(
+            LibraryRoute(
                 onGameClick = { gameId ->
                     navController.navigate(
                         "details/$gameId"
@@ -130,7 +137,7 @@ fun AppNavGraph(navController: NavHostController) {
             )
         }
         composable(route = Screen.AchievementsHuntingScreen.route) {
-            AchievementsScreen(onCategoryClick = { difficultyName ->
+            AchievementsRoute(onCategoryClick = { difficultyName ->
                 navController.navigate("difficulty_games/$difficultyName")
             })
         }
@@ -140,7 +147,7 @@ fun AppNavGraph(navController: NavHostController) {
         ) { backStackEntry ->
             val diffName = backStackEntry.arguments?.getString("difficultyName") ?: "NONE"
 
-            DifficultyGamesScreen(
+            DifficultyGamesRoute(
                 difficultyName = diffName,
                 onBack = { navController.popBackStack() },
                 onGameClick = { gameId ->
@@ -150,18 +157,21 @@ fun AppNavGraph(navController: NavHostController) {
             )
         }
         composable(Screen.ProfileScreen.route) {
-            ProfileScreen(onLogoutSuccess = {
+            ProfileRoute(onLogoutSuccess = {
                 navController.navigate(Screen.LoginScreen.route) {
                     popUpTo(0) { inclusive = true }
                 }
             })
         }
         composable(Screen.AiRecommendationScreen.route) {
-            AiAssistantScreen(onBackClick = { navController.popBackStack() }) { gameId ->
-                navController.navigate(
-                    "details/$gameId"
-                )
-            }
+            AiAssistantRoute(
+                onBackClick = { navController.popBackStack() },
+                onGameClick = { gameId ->
+                    navController.navigate(
+                        "details/$gameId"
+                    )
+                }
+            )
         }
 
     }
