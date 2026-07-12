@@ -6,38 +6,45 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vdggrtf.playlog.R
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
+import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.presentation.components.list.GamesListTemplate
+import com.vdggrtf.playlog.presentation.main.my_library.LibraryState
 import com.vdggrtf.playlog.presentation.main.my_library.MyLibraryViewModel
+import com.vdggrtf.playlog.presentation.main.recommendation.ai.AiAssistantScreen
+import com.vdggrtf.playlog.presentation.main.recommendation.ai.AiRecommendationGameViewModel
 import com.vdggrtf.playlog.presentation.main.recommendation.custom_challenges.ChallengeBoardRoute
 
 @Composable
-fun DifficultyGamesScreen(
+fun DifficultyGamesRoute(
     difficultyName: String,
     onBack: () -> Unit,
     onGameClick: (String) -> Unit,
-    onChallengeClick: (Int) -> Unit
+    onChallengeClick: (Int) -> Unit,
+    viewModel: MyLibraryViewModel = hiltViewModel(),
 ) {
+    val state by viewModel.state.collectAsState()
 
     if (difficultyName == AchievementDifficulty.CUSTOM_CHALLENGE.name) {
-        // 🚀 ЕСЛИ ЧЕЛЛЕНДЖ - РЕНДЕРИМ НАШУ КРУТУЮ ДОСКУ КОНТРАКТОВ!
+        // 🚀 If Challenge go to Challenge board
         ChallengeBoardRoute(
             onBackClick = onBack,
             onChallengeClick = onChallengeClick,
-            showOnlyCompleted = true // <-- Флаг, который мы добавим сейчас!
+            showOnlyCompleted = true // <-- only Completed challenges
         )
-        return // Прерываем выполнение функции, дальше не идем
+        return // <-- Exit the composable
     }
-
-    val viewModel: MyLibraryViewModel = hiltViewModel()
-    val state by viewModel.state.collectAsState()
 
     // Converting string from navigation back into an Enum.
     val difficulty = try {
@@ -47,7 +54,29 @@ fun DifficultyGamesScreen(
     }
 
     // Filter games by difficulty
-    val filteredGames = state.games.filter { it.verifiedDifficulty == difficulty }
+    // We cache the filtered list to prevent heavy recalculations on every UI frame.
+    // It will only recalculate if 'state.games' or 'difficulty' changes.
+    val filteredGames = remember(state.games, difficulty) {
+        state.games.filter { it.verifiedDifficulty == difficulty }
+    }
+
+    DifficultyGamesScreen(
+        state = state,
+        onBack = onBack,
+        onGameClick = onGameClick,
+        difficulty = difficulty,
+        filteredGames = filteredGames
+    )
+}
+
+@Composable
+fun DifficultyGamesScreen(
+    state: LibraryState,
+    difficulty: AchievementDifficulty,
+    filteredGames: List<GameModel>,
+    onBack: () -> Unit,
+    onGameClick: (String) -> Unit,
+) {
 
     // Screen
     GamesListTemplate(

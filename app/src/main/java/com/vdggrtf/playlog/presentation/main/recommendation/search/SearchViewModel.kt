@@ -3,7 +3,7 @@ package com.vdggrtf.playlog.presentation.main.recommendation.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vdggrtf.playlog.domain.model.GameModel
-import com.vdggrtf.playlog.domain.repository.GameRepository
+import com.vdggrtf.playlog.domain.usecase.search.SearchGamesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +24,8 @@ data class SearchState(
 
 
 @HiltViewModel
-class SearchViewModel @Inject constructor(private val repository: GameRepository) : ViewModel() {
+class SearchViewModel @Inject constructor(private val searchGamesUseCase: SearchGamesUseCase) :
+    ViewModel() {
 
     private val _state = MutableStateFlow(SearchState())
     val state = _state.asStateFlow()
@@ -40,19 +41,19 @@ class SearchViewModel @Inject constructor(private val repository: GameRepository
                 .debounce(500L)
                 .filter { it.isNotBlank() }
                 .collect { query ->
-                    if (query.isNotBlank()) {
-                        currentPage = 1
-                        _state.update { it.copy(searchResult = emptyList()) }
-                        performSearch(query, currentPage)
-                    } else {
-                        _state.update { it.copy(searchResult = emptyList(), isLoading = false) }
-                    }
+                    currentPage = 1
+                    _state.update { it.copy(searchResult = emptyList()) }
+                    performSearch(query, currentPage)
+
                 }
         }
     }
 
     fun onSearchQueryChange(newQuery: String) {
         _state.update { it.copy(query = newQuery) }
+        if (newQuery.isBlank()) {
+            _state.update { it.copy(searchResult = emptyList(), isLoading = false) }
+        }
     }
 
     fun loadMore() {
@@ -68,7 +69,7 @@ class SearchViewModel @Inject constructor(private val repository: GameRepository
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
-            repository.searchGames(query, page).fold(
+            searchGamesUseCase(query, page).fold(
                 onSuccess = { games ->
                     val updateList = if (page == 1) games else _state.value.searchResult + games
                     _state.update { it.copy(searchResult = updateList, isLoading = false) }

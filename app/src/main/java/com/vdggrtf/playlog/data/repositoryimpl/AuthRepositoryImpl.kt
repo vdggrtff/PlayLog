@@ -157,4 +157,39 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun isUserSessionActive(): Boolean {
+        return try {
+            //Wait for Supabase to refresh tokens from local storage
+            supabase.auth.awaitInitialization()
+
+            // Check if a session exists
+            supabase.auth.currentSessionOrNull() != null
+        } catch (e: Exception){
+            Log.e("AuthRepository", "Auth init error: ${e.message}")
+            // OFFLINE FALLBACK
+            supabase.auth.currentSessionOrNull() != null
+        }
+    }
+
+    override suspend fun syncUserProfile() {
+        val user = supabase.auth.currentUserOrNull()
+        if (user != null) {
+            val cloudName = user.userMetadata?.get("name")?.toString()?.replace("\"", "")
+            val userEmail = user.email ?: ""
+
+            if (!cloudName.isNullOrBlank()){
+                userStorage.saveUserData(cloudName, userEmail)
+            }
+        }
+    }
+
+    override suspend fun logout() {
+        try {
+            supabase.auth.signOut()
+        } catch (e: Exception){
+            Log.e("AuthRepository", "Ошибка выхода на сервере: ${e.message}")
+        } finally {
+            userStorage.clearStorage()
+        }
+    }
 }

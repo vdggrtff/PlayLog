@@ -13,5 +13,9 @@ interface LibraryRepository {
 
     suspend fun getLocalGameById(id: Int): GameModel?
 
+    suspend fun getCommunityDifficulties(gameId: Int): Result<List<String>>
+
+    suspend fun getTotalBounty(): Int
+
     suspend fun clearLocalDatabase()
 }

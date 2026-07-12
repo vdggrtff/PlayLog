@@ -12,10 +12,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
-fun SplashScreen(
+fun SplashRoute(
     onNavigate: (String) -> Unit,
+    viewModel: SplashScreenViewModel = hiltViewModel()
 ) {
-    val viewModel: SplashScreenViewModel = hiltViewModel()
     val startDestination by viewModel.startDestination.collectAsState()
 
     LaunchedEffect(startDestination) {
@@ -24,6 +24,12 @@ fun SplashScreen(
         }
     }
 
+    SplashScreen()
+}
+
+// 2. DUMB SCREEN: Только краски, холсты и анимации. Никакой логики!
+@Composable
+fun SplashScreen() {
     // Black screen
     Box(
         modifier = Modifier

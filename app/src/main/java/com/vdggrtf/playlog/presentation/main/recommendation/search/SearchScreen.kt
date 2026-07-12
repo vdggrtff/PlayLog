@@ -31,10 +31,33 @@ import com.vdggrtf.playlog.R
 import com.vdggrtf.playlog.presentation.components.list.GamesListTemplate
 
 @Composable
-fun SearchScreen(onBack: () -> Unit, onGameClick: (String) -> Unit) {
-
-    val viewModel: SearchViewModel = hiltViewModel()
+fun SearchRoute(
+    onBack: () -> Unit,
+    onGameClick: (String) -> Unit,
+    viewModel: SearchViewModel = hiltViewModel()
+) {
     val state by viewModel.state.collectAsState()
+
+
+    SearchScreen(
+        state = state,
+        onBack = onBack,
+        onGameClick = onGameClick,
+        onValueChange = { viewModel.onSearchQueryChange(it) },
+        onLoadMore = { viewModel.loadMore() },
+        onClear = { viewModel.onSearchQueryChange("") }
+    )
+}
+
+@Composable
+fun SearchScreen(
+    state: SearchState,
+    onBack: () -> Unit,
+    onGameClick: (String) -> Unit,
+    onValueChange: (String) -> Unit,
+    onClear: () -> Unit,
+    onLoadMore: () -> Unit,
+) {
 
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
@@ -50,7 +73,7 @@ fun SearchScreen(onBack: () -> Unit, onGameClick: (String) -> Unit) {
         headerContent = {
             OutlinedTextField(
                 value = state.query,
-                onValueChange = { viewModel.onSearchQueryChange(it) },
+                onValueChange = onValueChange,
                 placeholder = { Text(stringResource(R.string.add_game_name), color = Color.Gray) },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -65,7 +88,7 @@ fun SearchScreen(onBack: () -> Unit, onGameClick: (String) -> Unit) {
                 },
                 trailingIcon = {
                     if (state.query.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
+                        IconButton(onClick = onClear) {
                             Icon(
                                 Icons.Default.Clear,
                                 contentDescription = stringResource(R.string.clear),
@@ -99,7 +122,7 @@ fun SearchScreen(onBack: () -> Unit, onGameClick: (String) -> Unit) {
         },
 
         // infinite scroll
-        onLoadMore = { viewModel.loadMore() },
+        onLoadMore = onLoadMore,
         onBack = onBack,
         onGameClick = onGameClick
     )

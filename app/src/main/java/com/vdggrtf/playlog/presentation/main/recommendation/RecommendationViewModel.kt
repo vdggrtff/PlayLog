@@ -3,7 +3,7 @@ package com.vdggrtf.playlog.presentation.main.recommendation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vdggrtf.playlog.domain.model.GameModel
-import com.vdggrtf.playlog.domain.repository.GameRepository
+import com.vdggrtf.playlog.domain.usecase.recommendation.GetPopularGamesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +19,7 @@ data class RecommendationState (
 )
 
 @HiltViewModel
-class RecommendationViewModel @Inject constructor(private val repository: GameRepository): ViewModel() {
+class RecommendationViewModel @Inject constructor(private val getPopularGamesUseCase: GetPopularGamesUseCase): ViewModel() {
 
     private val _state = MutableStateFlow(RecommendationState())
     val state: StateFlow<RecommendationState> = _state.asStateFlow()
@@ -34,7 +34,8 @@ class RecommendationViewModel @Inject constructor(private val repository: GameRe
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
-            val result = repository.getPopularGames()
+            // Executing the UseCase like a simple function
+            val result = getPopularGamesUseCase(page = 1)
 
             result.fold(
                 onSuccess = {games ->
@@ -54,7 +55,7 @@ class RecommendationViewModel @Inject constructor(private val repository: GameRe
             _state.update { it.copy(isLoading = true) }
             currentPage++
 
-            repository.getPopularGames(page = currentPage).fold(
+            getPopularGamesUseCase(page = currentPage).fold(
                 onSuccess = { newGames ->
                     // merging old and new games!
                     val updatedList = _state.value.popularGames + newGames

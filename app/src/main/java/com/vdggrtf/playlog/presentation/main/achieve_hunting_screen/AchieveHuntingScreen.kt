@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -25,26 +26,71 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vdggrtf.playlog.R
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
+import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.presentation.components.card.DifficultySquareCard
+import com.vdggrtf.playlog.presentation.main.my_library.LibraryState
 import com.vdggrtf.playlog.presentation.main.my_library.MyLibraryViewModel
+
+data class PyramidState(
+    val row1: List<AchievementDifficulty>,
+    val row2: List<AchievementDifficulty>,
+    val row3: List<AchievementDifficulty>,
+    val gamesByDifficulty: Map<AchievementDifficulty, List<GameModel>>,
+)
+
+@Composable
+fun AchievementsRoute(
+    onCategoryClick: (String) -> Unit,
+    viewModel: MyLibraryViewModel = hiltViewModel(),
+) {
+    val state by viewModel.state.collectAsState()
+
+    // We use 'remember' to cache this heavy calculation.
+    // It will only re-run if the 'state.games' list actually changes, saving battery and CPU.
+    val pyramidState = remember(state.games) {
+
+        // 1. Filter out games that haven't been rated/verified yet
+        val completedGames = state.games.filter { it.verifiedDifficulty != AchievementDifficulty.NONE }
+
+        // 2. Group the remaining games by their difficulty
+        // This creates a Map<Difficulty, List<Game>> for incredibly fast O(1) lookups in the UI
+        val grouped = completedGames.groupBy { it.verifiedDifficulty }
+
+        // 3. Get all available difficulty levels from the Enum (excluding the empty NONE state)
+        val allDiffs = AchievementDifficulty.entries.filter { it != AchievementDifficulty.NONE }
+
+        // 4. Slice the Enum list into 3 rows to build a visual pyramid (3 -> 2 -> 1)
+        val r1 = allDiffs.take(3)          // Top row: Takes the first 3 items (EASY, MEDIUM, HARD)
+        val r2 = allDiffs.drop(3).take(2)  // Middle row: Skips the first 3, takes the next 2 (DEMON, IMPOSSIBLE)
+        val r3 = allDiffs.drop(5)          // Bottom row: Skips the first 5, takes the rest (CUSTOM_CHALLENGE)
+
+        PyramidState(
+            row1 = r1,
+            row2 = r2,
+            row3 = r3,
+            gamesByDifficulty = grouped
+        )
+    }
+
+    AchievementsScreen(
+        state = state,
+        row1 = pyramidState.row1,
+        row2 = pyramidState.row2,
+        row3 = pyramidState.row3,
+        gamesByDifficulty = pyramidState.gamesByDifficulty,
+        onCategoryClick = onCategoryClick,
+    )
+}
 
 @Composable
 fun AchievementsScreen(
+    state: LibraryState,
+    row1: List<AchievementDifficulty>,
+    row2: List<AchievementDifficulty>,
+    row3: List<AchievementDifficulty>,
+    gamesByDifficulty: Map<AchievementDifficulty, List<GameModel>>,
     onCategoryClick: (String) -> Unit,
 ) {
-    val viewModel: MyLibraryViewModel = hiltViewModel()
-    val state by viewModel.state.collectAsState()
-
-    val completedGames = state.games.filter { it.verifiedDifficulty != AchievementDifficulty.NONE }
-    val gamesByDifficulty = completedGames.groupBy { it.verifiedDifficulty }
-    val allDifficulties = AchievementDifficulty.entries.filter { it != AchievementDifficulty.NONE }
-
-    // breaking it down into 3 levels for the perfect pyramid (3 -> 2 -> 1).
-    val row1 = allDifficulties.take(3)          // EASY, MEDIUM, HARD
-    val row2 = allDifficulties.drop(3).take(2)  // DEMON, IMPOSSIBLE
-    val row3 = allDifficulties.drop(5)          // CUSTOM_CHALLENGE
-
-
     Column(
         modifier = Modifier
             .fillMaxSize()
