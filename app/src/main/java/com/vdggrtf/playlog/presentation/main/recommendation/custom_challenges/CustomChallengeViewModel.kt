@@ -5,9 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vdggrtf.playlog.domain.model.CustomChallengeModel
 import com.vdggrtf.playlog.domain.model.GameStatus
-import com.vdggrtf.playlog.domain.usecase.challenge.GetCustomChallengesUseCase
-import com.vdggrtf.playlog.domain.usecase.challenge.UpdateChallengeStatusUseCase
-import com.vdggrtf.playlog.domain.usecase.challenge.VerifyChallengeProofUseCase
+import com.vdggrtf.playlog.domain.usecase.main.challenge.GetCustomChallengesUseCase
+import com.vdggrtf.playlog.domain.usecase.main.challenge.UpdateChallengeStatusUseCase
+import com.vdggrtf.playlog.domain.usecase.main.challenge.VerifyChallengeProofUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

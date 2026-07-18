@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
 import com.vdggrtf.playlog.domain.model.GameModel
-import com.vdggrtf.playlog.domain.usecase.ai.VerifyGameCompletionUseCase
+import com.vdggrtf.playlog.domain.usecase.main.ai.VerifyGameCompletionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow

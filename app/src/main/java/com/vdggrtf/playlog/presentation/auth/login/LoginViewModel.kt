@@ -2,8 +2,7 @@ package com.vdggrtf.playlog.presentation.auth.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.vdggrtf.playlog.domain.repository.AuthRepository
-import com.vdggrtf.playlog.utils.validators.Validators
+import com.vdggrtf.playlog.domain.usecase.auth.login.LoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,34 +18,19 @@ data class LoginState(
 
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(private val repository: AuthRepository): ViewModel() {
+class LoginViewModel @Inject constructor(private val loginUseCase: LoginUseCase): ViewModel() {
 
     private val _state = MutableStateFlow(LoginState())
     val state = _state.asStateFlow()
 
     fun login(email: String, password: String) {
-        // 1. Очищаем почту от случайных пробелов в начале и в конце
-        val cleanEmail = email.trim()
-
-        // 2. Проверка на пустоту
-        if (cleanEmail.isBlank() || password.isBlank()) {
-            _state.update { it.copy(error = "Заполните все поля") }
-            return
-        }
-
-        // 3. Проверка формата почты (ВАЖНО: передаем cleanEmail!)
-        if (!Validators.isValidEmail(cleanEmail)) {
-            _state.update { it.copy(error = "Некорректный формат email") }
-            return
-        }
-
-        // 4. Сетевой запрос
+        // Сетевой запрос
         viewModelScope.launch {
             // Сбрасываем ошибку перед отправкой запроса и крутим лоадер
             _state.update { it.copy(isLoading = true, error = null) }
 
             // ВАЖНО: Отправляем на сервер очищенную почту!
-            repository.login(cleanEmail, password).fold(
+            loginUseCase(email, password).fold(
                 onSuccess = {
                     _state.update { it.copy(isLoading = false, isSuccess = true) }
                 },

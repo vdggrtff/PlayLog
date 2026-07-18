@@ -11,7 +11,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.vdggrtf.playlog.presentation.auth.login.LoginRoute
 import com.vdggrtf.playlog.presentation.auth.login.LoginScreen
+import com.vdggrtf.playlog.presentation.auth.registrartion.RegistrationRoute
 import com.vdggrtf.playlog.presentation.auth.registrartion.RegistrationScreen
 import com.vdggrtf.playlog.presentation.main.achieve_hunting_screen.AchievementsRoute
 import com.vdggrtf.playlog.presentation.main.achieve_hunting_screen.AchievementsScreen
@@ -69,7 +71,7 @@ fun AppNavGraph(navController: NavHostController) {
             })
         }
         composable(route = Screen.RegistrationScreen.route) {
-            RegistrationScreen(
+            RegistrationRoute(
                 onNavigateToLogin = { navController.navigate(Screen.LoginScreen.route) },
                 onNavigateToMain = {
                     navController.navigate(
@@ -78,7 +80,7 @@ fun AppNavGraph(navController: NavHostController) {
                 })
         }
         composable(route = Screen.LoginScreen.route) {
-            LoginScreen(
+            LoginRoute(
                 onNavigateToRegister = { navController.navigate(Screen.RegistrationScreen.route) },
                 onNavigateToMain = {
                     navController.navigate(

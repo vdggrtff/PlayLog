@@ -1,22 +1,21 @@
 package com.vdggrtf.playlog.presentation.dialogs
 
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -27,13 +26,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.vdggrtf.playlog.R
 import com.vdggrtf.playlog.presentation.components.profile.GamerPassportUi
-import com.vdggrtf.playlog.ui.theme.AiAccent
 import com.vdggrtf.playlog.ui.theme.CardBackground
 import com.vdggrtf.playlog.utils.ShareUtils
-import dev.shreyaspatil.capturable.Capturable
+import dev.shreyaspatil.capturable.capturable
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
+import kotlinx.coroutines.launch
 
 @Composable
+@OptIn(ExperimentalComposeUiApi::class)
 fun PassportShareDialog(
     nickname: String,
     totalGames: Int,
@@ -45,6 +45,7 @@ fun PassportShareDialog(
 ) {
     val captureController = rememberCaptureController()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     Dialog(onDismissRequest = onDismiss) {
         Column(
@@ -61,14 +62,7 @@ fun PassportShareDialog(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            Capturable(
-                controller = captureController,
-                onCaptured = { bitmap, error ->
-                    if (bitmap != null) {
-                        ShareUtils.shareImage(context, bitmap.asAndroidBitmap())
-                    }
-                }
-            ) {
+            Box(modifier = Modifier.capturable(captureController)){
                 GamerPassportUi(
                     nickname = nickname,
                     totalGames = totalGames,
@@ -84,25 +78,22 @@ fun PassportShareDialog(
             // Screenshot
             Button(
                 onClick = {
-                    captureController.capture()
+                    // 💥 TRIGGER THE CAPTURE ASYNC INSIDE A COROUTINE!
+                    scope.launch {
+                        try {
+                            // Capture the UI, wait for the result, and convert it to Android Bitmap
+                            val bitmap = captureController.captureAsync().await().asAndroidBitmap()
+
+                            // Share the bitmap using your existing ShareUtils
+                            ShareUtils.shareImage(context, bitmap)
+                        } catch (error: Throwable) {
+                            Log.e("PassportShare", "Failed to capture screenshot: ${error.message}")
+                        }
+                    }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = AiAccent),
-                shape = RoundedCornerShape(12.dp)
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Icon(
-                    Icons.Default.Share,
-                    contentDescription = stringResource(R.string.share),
-                    tint = Color.Black
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    stringResource(R.string.share),
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold
-                )
+                Text("SHARE")
             }
 
             Spacer(modifier = Modifier.height(8.dp))

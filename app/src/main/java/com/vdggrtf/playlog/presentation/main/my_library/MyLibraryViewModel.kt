@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
 import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.domain.model.GameStatus
-import com.vdggrtf.playlog.domain.usecase.library.GetCompletedBountiesCountUseCase
-import com.vdggrtf.playlog.domain.usecase.library.ObserveMyLibraryUseCase
+import com.vdggrtf.playlog.domain.usecase.main.library.GetCompletedBountiesCountUseCase
+import com.vdggrtf.playlog.domain.usecase.main.library.ObserveMyLibraryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

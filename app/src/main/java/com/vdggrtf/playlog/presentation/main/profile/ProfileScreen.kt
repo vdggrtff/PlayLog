@@ -41,6 +41,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -55,8 +56,8 @@ import com.vdggrtf.playlog.presentation.components.profile.GamerPassportUi
 import com.vdggrtf.playlog.presentation.dialogs.PassportShareDialog
 import com.vdggrtf.playlog.ui.theme.Background
 
-
 // 1. SMART ROUTE: Handles ViewModel, Context, Intents and Navigation
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ProfileRoute(
     onLogoutSuccess: () -> Unit,
@@ -88,6 +89,7 @@ fun ProfileRoute(
 
 
 // 2. DUMB SCREEN: Pure UI, completely stateless!
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ProfileScreen(
     state: ProfileState,
