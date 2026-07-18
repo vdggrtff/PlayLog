@@ -11,25 +11,18 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.vdggrtf.playlog.presentation.auth.login.LoginScreen
-import com.vdggrtf.playlog.presentation.auth.registrartion.RegistrationScreen
+import com.vdggrtf.playlog.presentation.auth.login.LoginRoute
+import com.vdggrtf.playlog.presentation.auth.registrartion.RegistrationRoute
 import com.vdggrtf.playlog.presentation.main.achieve_hunting_screen.AchievementsRoute
-import com.vdggrtf.playlog.presentation.main.achieve_hunting_screen.AchievementsScreen
 import com.vdggrtf.playlog.presentation.main.achieve_hunting_screen.difficulty_games_screen.DifficultyGamesRoute
-import com.vdggrtf.playlog.presentation.main.achieve_hunting_screen.difficulty_games_screen.DifficultyGamesScreen
 import com.vdggrtf.playlog.presentation.main.game_details.GameDetailsRoute
-import com.vdggrtf.playlog.presentation.main.game_details.GameDetailsScreen
 import com.vdggrtf.playlog.presentation.main.my_library.LibraryRoute
-import com.vdggrtf.playlog.presentation.main.my_library.LibraryScreen
 import com.vdggrtf.playlog.presentation.main.profile.ProfileRoute
 import com.vdggrtf.playlog.presentation.main.recommendation.RecommendationRoute
-import com.vdggrtf.playlog.presentation.main.recommendation.RecommendationScreen
 import com.vdggrtf.playlog.presentation.main.recommendation.ai.AiAssistantRoute
-import com.vdggrtf.playlog.presentation.main.recommendation.ai.AiAssistantScreen
 import com.vdggrtf.playlog.presentation.main.recommendation.custom_challenges.ChallengeBoardRoute
 import com.vdggrtf.playlog.presentation.main.recommendation.custom_challenges.challenge.ChallengeDetailsRoute
 import com.vdggrtf.playlog.presentation.main.recommendation.search.SearchRoute
-import com.vdggrtf.playlog.presentation.main.recommendation.search.SearchScreen
 import com.vdggrtf.playlog.presentation.splash.SplashRoute
 
 @Composable
@@ -69,7 +62,7 @@ fun AppNavGraph(navController: NavHostController) {
             })
         }
         composable(route = Screen.RegistrationScreen.route) {
-            RegistrationScreen(
+            RegistrationRoute(
                 onNavigateToLogin = { navController.navigate(Screen.LoginScreen.route) },
                 onNavigateToMain = {
                     navController.navigate(
@@ -78,7 +71,7 @@ fun AppNavGraph(navController: NavHostController) {
                 })
         }
         composable(route = Screen.LoginScreen.route) {
-            LoginScreen(
+            LoginRoute(
                 onNavigateToRegister = { navController.navigate(Screen.RegistrationScreen.route) },
                 onNavigateToMain = {
                     navController.navigate(

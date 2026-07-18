@@ -3,7 +3,7 @@ package com.vdggrtf.playlog.presentation.main.recommendation.ai
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vdggrtf.playlog.domain.model.GameModel
-import com.vdggrtf.playlog.domain.usecase.ai.GetAiRecommendationsWithDetailsUseCase
+import com.vdggrtf.playlog.domain.usecase.main.ai.GetAiRecommendationsWithDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

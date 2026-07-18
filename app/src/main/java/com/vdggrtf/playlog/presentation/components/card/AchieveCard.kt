@@ -1,7 +1,5 @@
 package com.vdggrtf.playlog.presentation.components.card
 
-import android.R.attr.scaleX
-import android.R.attr.scaleY
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -40,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vdggrtf.playlog.R
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
+import com.vdggrtf.playlog.presentation.components.AnimatedDemonWebpIcon
 
 @Composable
 fun DifficultySquareCard(
@@ -66,12 +65,16 @@ fun DifficultySquareCard(
         verticalArrangement = Arrangement.Center
     ) {
 
-        if (difficulty == AchievementDifficulty.CUSTOM_CHALLENGE) { // Или DEMON, смотря для кого ты вырезал вихрь
+        if (difficulty == AchievementDifficulty.CUSTOM_CHALLENGE) {
             AnimatedImpossibleIcon(
                 modifier = Modifier.size(60.dp)
             )
-        } else {
-            // Обычная статичная картинка для всех остальных (Easy, Medium, Hard и т.д.)
+        } else if (difficulty == AchievementDifficulty.DEMON){
+            AnimatedDemonWebpIcon(
+                modifier = Modifier.size(60.dp)
+            )
+        }
+        else {
             Image(
                 painter = painterResource(id = difficulty.emoji),
                 contentDescription = difficulty.title,

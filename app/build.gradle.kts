@@ -23,7 +23,7 @@ val supabaseAnonKey = localProperties.getProperty("SUPABASE_ANON_KEY") ?: ""
 android {
     namespace = "com.vdggrtf.playlog"
     compileSdk {
-        version = release(36) {
+        version = release(37) {
             minorApiLevel = 1
         }
     }
@@ -79,24 +79,23 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(libs.compose.material.icons.extended)
-    implementation("com.google.dagger:hilt-android:2.59.2")
-    ksp("com.google.dagger:hilt-android-compiler:2.59.2")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    implementation("androidx.compose.runtime:runtime-livedata:1.10.4")
-    implementation("androidx.navigation:navigation-compose:2.9.7")
-    implementation("com.google.code.gson:gson:2.13.2")
+    implementation("com.google.dagger:hilt-android:2.60.1")
+    ksp("com.google.dagger:hilt-android-compiler:2.60.1")
+    implementation("androidx.hilt:hilt-navigation-compose:1.4.0")
+    implementation("androidx.compose.runtime:runtime-livedata:1.11.4")
+    implementation("androidx.navigation:navigation-compose:2.9.8")
+    implementation("com.google.code.gson:gson:2.14.0")
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
-    implementation("com.squareup.okhttp3:okhttp:5.3.2")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.3.2")
-    testImplementation("com.squareup.okhttp3:mockwebserver:5.3.2")
-    implementation("androidx.datastore:datastore-preferences:1.2.0")
-    testImplementation("io.mockk:mockk:1.14.9")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
-    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("com.squareup.okhttp3:okhttp:5.4.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:5.4.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.4.0")
+    implementation("androidx.datastore:datastore-preferences:1.2.1")
+    testImplementation("io.mockk:mockk:1.14.11")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
+    implementation("androidx.room:room-runtime:2.8.4")
+    implementation("androidx.room:room-ktx:2.8.4")
+    ksp("androidx.room:room-compiler:2.8.4")
 
     val supabaseVersion = "2.4.2"
     implementation("io.github.jan-tennert.supabase:gotrue-kt:$supabaseVersion")
@@ -105,7 +104,9 @@ dependencies {
     val ktorVersion = "2.3.9"
     implementation("io.ktor:ktor-client-android:$ktorVersion")
 
-    implementation("com.google.ai.client.generativeai:generativeai:0.2.2")
-    implementation("androidx.browser:browser:1.8.0")
-    implementation("dev.shreyaspatil:capturable:2.1.0")
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+    implementation("androidx.browser:browser:1.10.0")
+    implementation("dev.shreyaspatil:capturable:3.0.1")
+    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("io.coil-kt:coil-gif:2.7.0")
 }
