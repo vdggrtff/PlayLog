@@ -53,7 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vdggrtf.playlog.R
 import com.vdggrtf.playlog.presentation.components.profile.GamerPassportUi
-import com.vdggrtf.playlog.presentation.dialogs.PassportShareDialog
+import com.vdggrtf.playlog.presentation.components.dialogs.PassportShareDialog
 import com.vdggrtf.playlog.ui.theme.Background
 
 // 1. SMART ROUTE: Handles ViewModel, Context, Intents and Navigation

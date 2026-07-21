@@ -15,4 +15,6 @@ interface ChallengeRepository {
 
     // Fetches a map of challenge IDs to their current game statuses for the active user
     suspend fun getUserChallengeStatuses(): Result<Map<Int, GameStatus>>
+
+    suspend fun getChallengesByGameId(gameId: Int): Result<List<CustomChallengeModel>>
 }

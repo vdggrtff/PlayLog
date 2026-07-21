@@ -8,6 +8,7 @@ import com.vdggrtf.playlog.domain.model.AchievementDifficulty
 import com.vdggrtf.playlog.domain.model.CustomChallengeModel
 import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.domain.model.GameStatus
+import com.vdggrtf.playlog.domain.usecase.main.challenge.GetChallengesForGameUseCase
 import com.vdggrtf.playlog.domain.usecase.main.game.ChangeGameStatusUseCase
 import com.vdggrtf.playlog.domain.usecase.main.game.FetchAndSyncRemoteGameUseCase
 import com.vdggrtf.playlog.domain.usecase.main.game.FinishGameWithRatingUseCase
@@ -52,6 +53,7 @@ class GameDetailsViewModel @Inject constructor(
     private val finishGameWithRatingUseCase: FinishGameWithRatingUseCase,
     private val changeGameStatusUseCase: ChangeGameStatusUseCase,
     private val fetchAndSyncRemoteGameUseCase: FetchAndSyncRemoteGameUseCase,
+    private val getChallengesForGameUseCase: GetChallengesForGameUseCase,
     savedStateHandle: SavedStateHandle,
     private val getBestGameDealUseCase: GetBestGameDealUseCase,
     private val getCommunityRatingUseCase: GetCommunityRatingUseCase,
@@ -66,6 +68,7 @@ class GameDetailsViewModel @Inject constructor(
             loadGameDetails(gameId)
             checkIfGameInMyLibrary(gameId)
             loadCommunityRating(gameId)
+            loadGameChallenges(gameId)
         } else {
             _state.update { it.copy(isLoading = false, error = "Invalid game ID") }
         }
@@ -193,6 +196,19 @@ class GameDetailsViewModel @Inject constructor(
                             isAiThinking = false
                         )
                     }
+                }
+            )
+        }
+    }
+
+    private fun loadGameChallenges(gameId: Int) {
+        viewModelScope.launch {
+            getChallengesForGameUseCase(gameId).fold(
+                onSuccess = { challengesList ->
+                    _state.update { it.copy(customChallenges = challengesList) }
+                },
+                onFailure = { error ->
+                    _state.update { it.copy(error = error.message) }
                 }
             )
         }

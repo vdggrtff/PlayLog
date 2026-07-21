@@ -5,6 +5,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -64,8 +66,9 @@ import com.vdggrtf.playlog.presentation.components.card_details.ExpandableDescri
 import com.vdggrtf.playlog.presentation.components.card_details.GameHeaderSection
 import com.vdggrtf.playlog.presentation.components.card_details.StatusOptionRow
 import com.vdggrtf.playlog.presentation.components.card_details.StoreLinksRow
-import com.vdggrtf.playlog.presentation.dialogs.UserRatingDialog
+import com.vdggrtf.playlog.presentation.components.dialogs.UserRatingDialog
 import com.vdggrtf.playlog.presentation.main.my_library.scaner.VerificationViewModel
+import com.vdggrtf.playlog.presentation.main.recommendation.custom_challenges.BountyGridCard
 import com.vdggrtf.playlog.ui.theme.AiAccent
 import com.vdggrtf.playlog.ui.theme.Background
 import com.vdggrtf.playlog.ui.theme.CardBackground
@@ -304,6 +307,41 @@ fun GameDetailsScreen(
                     }
                 } else {
                     items(gameState.achievements) { ach -> AchievementRow(ach) }
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+
+                if (gameState.customChallenges.isNotEmpty()) {
+                    Text(
+                        text = "ACTIVE BOUNTIES (${gameState.customChallenges.size})",
+                        color = Color(0xFFFF9100), // Оранжевый цвет баунти
+                        fontWeight = FontWeight.Black,
+                        fontSize = 18.sp,
+                        letterSpacing = 1.sp
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Горизонтальный скролл (Карусель)
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(end = 16.dp)
+                    ) {
+                        items(gameState.customChallenges) { challenge ->
+                            // Используем ту самую карточку, которую мы написали для Доски!
+                            // Только задаем ей фиксированную ширину, чтобы она красиво скроллилась
+                            Box(modifier = Modifier.width(200.dp)) {
+                                BountyGridCard(
+                                    challenge = challenge,
+                                    onClick = {
+                                        // TODO: В будущем можно открывать шторку деталей челленджа прямо тут
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
         }

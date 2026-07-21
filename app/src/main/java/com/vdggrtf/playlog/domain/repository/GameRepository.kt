@@ -20,5 +20,6 @@ interface GameRepository {
     suspend fun getCachedGame(id: Int): CashedGameDto?
 
     suspend fun getGamePrices(gameName: String): Result<List<CheapSharkDealDto>>
+
     suspend fun saveToCache(cacheDto: CashedGameDto)
 }

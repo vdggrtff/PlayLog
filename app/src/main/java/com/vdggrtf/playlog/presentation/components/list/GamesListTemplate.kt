@@ -6,10 +6,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -17,8 +20,14 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.FilterAlt
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.ViewList
+import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -47,6 +56,9 @@ fun GamesListTemplate(
     title: String,
     isLoading: Boolean,
     games: List<GameModel>,
+    gridColumns: Int = 2,
+    onToggleGridClick: (() -> Unit)? = null,
+    onAdvancedFilterClick: (() -> Unit)? = null,
     headerContent: @Composable (() -> Unit)? = null,
     filters: List<String> = emptyList(),
     selectedFilter: String = "",
@@ -77,7 +89,7 @@ fun GamesListTemplate(
             .statusBarsPadding()
     ) {
         //  Header (print if have name or button back)
-        if (title.isNotEmpty() || onBack != null) {
+        if (title.isNotEmpty() || onBack != null || onToggleGridClick != null || onAdvancedFilterClick != null) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -89,21 +101,45 @@ fun GamesListTemplate(
                         Icon(Icons.Default.ArrowBack, null, tint = Color.White)
                     }
                 }
-                if (title.isNotEmpty()) {
-                    Text(
-                        text = title,
-                        color = Color.White,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
+                Text(
+                    text = title,
+                    color = Color.White,
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    modifier = Modifier.weight(1f).padding(start = if (onBack != null) 0.dp else 8.dp)
+                )
+
+                // 💥 Кнопка Продвинутых Фильтров (Шторка)
+                if (onAdvancedFilterClick != null) {
+                    IconButton(
+                        onClick = onAdvancedFilterClick,
+                        modifier = Modifier.background(Color(0xFF1E1E26), CircleShape).size(40.dp)
+                    ) {
+                        Icon(Icons.Default.FilterAlt, contentDescription = "Filters", tint = Color.White)
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+
+                // 💥 Кнопка Сетки (1, 2 или 4 колонки)
+                if (onToggleGridClick != null) {
+                    IconButton(
+                        onClick = onToggleGridClick,
+                        modifier = Modifier.background(Color(0xFF1E1E26), CircleShape).size(40.dp)
+                    ) {
+                        val gridIcon = when (gridColumns) {
+                            1 -> Icons.Default.ViewList // Список
+                            2 -> Icons.Default.GridView // 2 колонки
+                            else -> Icons.Default.ViewModule // Плитка
+                        }
+                        Icon(gridIcon, contentDescription = "Toggle Grid", tint = Color.White)
+                    }
                 }
             }
         }
 
         LazyVerticalGrid(
             state = gridState,
-            columns = GridCells.Fixed(2),
+            columns = GridCells.Fixed(gridColumns),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 80.dp, top = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),

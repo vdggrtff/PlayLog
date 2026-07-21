@@ -101,4 +101,18 @@ class ChallengeRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun getChallengesByGameId(gameId: Int): Result<List<CustomChallengeModel>> {
+        return try {
+            val dtos = supabase.from("custom_challenge")
+                .select { filter { eq("game_id", gameId) } }
+                .decodeList<ChallengeDto>()
+
+            val models = dtos.map { it.toDomainModel() }
+            Result.success(models)
+        } catch (e: Exception){
+            Log.e("ChallengeRepository", "Error downloading challenges games: ${e.message}")
+            Result.failure(e)
+        }
+    }
 }

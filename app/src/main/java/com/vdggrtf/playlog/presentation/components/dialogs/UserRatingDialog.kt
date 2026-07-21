@@ -1,4 +1,4 @@
-package com.vdggrtf.playlog.presentation.dialogs
+package com.vdggrtf.playlog.presentation.components.dialogs
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridCells.Fixed
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.vdggrtf.playlog.R
+import com.vdggrtf.playlog.R.string
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
 import com.vdggrtf.playlog.ui.theme.AiAccent
 import com.vdggrtf.playlog.ui.theme.CardBackground
@@ -58,7 +60,7 @@ fun UserRatingDialog(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                stringResource(R.string._100_confirmed),
+                stringResource(string._100_confirmed),
                 color = Color.Green,
                 fontWeight = FontWeight.Black,
                 fontSize = 18.sp
@@ -67,7 +69,7 @@ fun UserRatingDialog(
 
             Text(
                 text = stringResource(
-                    R.string.the_ai_rated_the_difficulty_as,
+                    string.the_ai_rated_the_difficulty_as,
                     aiDifficulty.title.uppercase()
                 ),
                 color = Color.LightGray,
@@ -76,7 +78,7 @@ fun UserRatingDialog(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = stringResource(R.string.what_do_you_think),
+                text = stringResource(string.what_do_you_think),
                 color = Color.White,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 16.sp
@@ -86,7 +88,7 @@ fun UserRatingDialog(
 
             // grid with difficulty buttons
             LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
+                columns = Fixed(3),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.height(180.dp)
@@ -119,7 +121,7 @@ fun UserRatingDialog(
             Spacer(modifier = Modifier.height(16.dp))
 
             TextButton(onClick = onSkip) {
-                Text(stringResource(R.string.skip), color = Color.Gray)
+                Text(stringResource(string.skip), color = Color.Gray)
             }
         }
     }
