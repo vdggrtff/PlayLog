@@ -14,4 +14,6 @@ data class GameModel(
     val aiDifficulty: AchievementDifficulty = AchievementDifficulty.NONE,
     val userDifficulty: AchievementDifficulty = AchievementDifficulty.NONE,
     val verifiedDifficulty: AchievementDifficulty = AchievementDifficulty.NONE,
+    val genres: List<String> = emptyList(),
+    val platforms: List<String> = emptyList(),
 )

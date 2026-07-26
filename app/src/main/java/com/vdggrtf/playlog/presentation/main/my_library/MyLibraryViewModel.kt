@@ -1,10 +1,13 @@
 package com.vdggrtf.playlog.presentation.main.my_library
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vdggrtf.playlog.data.network.dto.ChallengeDto
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
 import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.domain.model.GameStatus
+import com.vdggrtf.playlog.domain.usecase.main.challenge.GetTrackedBountyGameIdsUseCase
 import com.vdggrtf.playlog.domain.usecase.main.library.GetCompletedBountiesCountUseCase
 import com.vdggrtf.playlog.domain.usecase.main.library.ObserveMyLibraryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +26,9 @@ data class AdvancedFilters(
     val ratingRange: ClosedFloatingPointRange<Float> = 0f..5f,
     val yearRange: ClosedFloatingPointRange<Float> = 1990f..2026f,
     val difficulty: AchievementDifficulty = AchievementDifficulty.NONE,
+    val hasBounties: Boolean = false,
+    val selectedGenres: List<String> = emptyList(),
+    val selectedPlatforms: List<String> = emptyList(),
 )
 
 data class LibraryState(
@@ -37,6 +43,7 @@ data class LibraryState(
 class MyLibraryViewModel @Inject constructor(
     private val observeMyLibraryUseCase: ObserveMyLibraryUseCase,
     private val getCompletedBountiesCountUseCase: GetCompletedBountiesCountUseCase,
+    private val getTrackedBountyGameIdsUseCase: GetTrackedBountyGameIdsUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LibraryState())
@@ -45,11 +52,11 @@ class MyLibraryViewModel @Inject constructor(
     private val _selectedStatus = MutableStateFlow<GameStatus>(GameStatus.COMPLETED)
     val selectedStatus = _selectedStatus.asStateFlow()
 
-    private val _selectedDifficultyFilter = MutableStateFlow<AchievementDifficulty?>(null)
-    val selectedDifficultyFilter = _selectedDifficultyFilter.asStateFlow()
-
     private val _advancedFilters = MutableStateFlow(AdvancedFilters())
     val advancedFilters = _advancedFilters.asStateFlow()
+
+    private val _gamesWithCompletedChallenges = MutableStateFlow<Set<Int>>(emptySet())
+    val gamesWithCompletedChallenges = _gamesWithCompletedChallenges.asStateFlow()
 
     init {
         showMyLibrary()
@@ -59,31 +66,75 @@ class MyLibraryViewModel @Inject constructor(
             combine(
                 _state.map { it.games }.distinctUntilChanged(),
                 _selectedStatus,
-                _advancedFilters
-            ) { gamesList, currentStatus, advancedFilters ->
+                _advancedFilters,
+                _gamesWithCompletedChallenges
+            ) { gamesList, currentStatus, advancedFilters, gamesWithBounties ->
 
                 var filtered = gamesList
+                Log.d("FILTER_DEBUG", "1. Исходно игр: ${filtered.size}")
 
+                // status filter
                 filtered = filtered.filter { it.status == currentStatus }
+                Log.d("FILTER_DEBUG", "2. После статуса ($currentStatus): ${filtered.size}")
 
+                // difficulty filter
                 if (advancedFilters.difficulty != AchievementDifficulty.NONE) {
                     filtered = filtered.filter { game ->
-                        val actualDifficulty = if (game.verifiedDifficulty != AchievementDifficulty.NONE) {
-                            game.verifiedDifficulty
-                        } else {
-                            game.aiDifficulty
-                        }
+                        val actualDifficulty =
+                            if (game.verifiedDifficulty != AchievementDifficulty.NONE) {
+                                game.verifiedDifficulty
+                            } else {
+                                game.aiDifficulty
+                            }
 
                         actualDifficulty == advancedFilters.difficulty
                     }
                 }
+                Log.d("FILTER_DEBUG", "3. После сложности: ${filtered.size}")
 
+                // year and rating filter
                 filtered = filtered.filter { game ->
                     val rating = game.rating?.toFloat() ?: 0f
                     val year = game.releasedDate?.take(4)?.toFloatOrNull() ?: 1990f
 
                     rating in advancedFilters.ratingRange && year in advancedFilters.yearRange
                 }
+                Log.d("FILTER_DEBUG", "6. ФИНАЛ (После рейтинга и года): ${filtered.size}")
+
+                // genre filter
+                if (advancedFilters.selectedGenres.isNotEmpty()) {
+                    filtered = filtered.filter { game ->
+                        game.genres.any { gameGenre ->
+                            advancedFilters.selectedGenres.any { selectedGenre ->
+                                gameGenre.contains(selectedGenre, ignoreCase = true)
+                            }
+                        }
+                    }
+                }
+                Log.d("FILTER_DEBUG", "4. После жанров: ${filtered.size}")
+
+                // platforms filter
+                if (advancedFilters.selectedPlatforms.isNotEmpty()) {
+                    filtered = filtered.filter { game ->
+                        game.platforms.any { gamePlatform ->
+                            advancedFilters.selectedPlatforms.any { selectedPlatform ->
+                                if (selectedPlatform == "Mobile") {
+                                    gamePlatform.contains("Android", ignoreCase = true) ||
+                                            gamePlatform.contains("iOS", ignoreCase = true)
+                                } else {
+                                    gamePlatform.contains(selectedPlatform, ignoreCase = true)
+                                }
+                            }
+                        }
+                    }
+                }
+                Log.d("FILTER_DEBUG", "platforms filter: ${filtered.size}")
+
+                // have game challenge or not
+                if (advancedFilters.hasBounties){
+                    filtered = filtered.filter { gamesWithBounties.contains(it.id) }
+                }
+                Log.d("FILTER_DEBUG", "5. После свитча Bounties: ${filtered.size}")
 
                 filtered
             }.collect { resultList ->
@@ -103,19 +154,18 @@ class MyLibraryViewModel @Inject constructor(
                 _state.update { it.copy(completedBountiesCount = count) }
             }
 
+            // 💥 2. НОВОЕ: ЗАПОЛНЯЕМ НАШУ КОРОБКУ ДЛЯ ФИЛЬТРА!
+            launch {
+                val gameIds = getTrackedBountyGameIdsUseCase()
+                Log.d("BOUNTY_DEBUG", "💥 Скачали ID игр с контрактами: $gameIds")
+                _gamesWithCompletedChallenges.value = gameIds
+            }
+
             // 2. Collect local library games from Room.
             // Since 'collect' is a terminal operator that runs indefinitely, it must be launched last.
             observeMyLibraryUseCase().collect { gameModels ->
                 _state.update { it.copy(isLoading = false, games = gameModels) }
             }
-        }
-    }
-
-    fun toggleDifficultyFilter(difficulty: AchievementDifficulty) {
-        if (_selectedDifficultyFilter.value == difficulty) {
-            _selectedDifficultyFilter.value = null
-        } else {
-            _selectedDifficultyFilter.value = difficulty
         }
     }
 

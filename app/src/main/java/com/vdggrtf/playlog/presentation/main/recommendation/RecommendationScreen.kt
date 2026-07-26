@@ -29,10 +29,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.vdggrtf.playlog.R
+import com.vdggrtf.playlog.presentation.components.bottom_sheet.AdvancedFiltersScreen
 import com.vdggrtf.playlog.presentation.components.list.GamesListTemplate
 import com.vdggrtf.playlog.presentation.components.tabs.DiscoveryWidgetsRow
+import com.vdggrtf.playlog.presentation.main.my_library.AdvancedFilters
 import com.vdggrtf.playlog.ui.theme.CardBackground
 
 @Composable
@@ -44,9 +46,7 @@ fun RecommendationRoute(
     viewModel: RecommendationViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
-
-    val genreFilters = listOf("Action", "RPG", "Shooter", "Adventure", "Indie")
-    var selectedGenre by remember { mutableStateOf("Action") }
+    val advancedFilters by viewModel.advancedFilters.collectAsState()
 
 
     RecommendationScreen(
@@ -55,37 +55,38 @@ fun RecommendationRoute(
         onSearchClick = onSearchClick,
         onAiAssistantClick = onAiAssistantClick,
         onNavigateToChallenges = onNavigateToChallenges,
-        genreFilters = genreFilters,
-        selectedGenre = selectedGenre,
-        onFilterClick = { selectedGenre = it },
-        onLoadMore = { viewModel.loadMoreGames() }
-
+        onLoadMore = { viewModel.loadMoreGames() },
+        gridColumns = state.gridColumns,
+        onToggleGrid = { viewModel.toggleGridColumns() },
+        advancedFilters = advancedFilters,
+        onApplyFilters = { newFilters -> viewModel.applyAdvancedFilters(newFilters) },
+        onResetFilters = { viewModel.resetAdvancedFilters() },
     )
 }
 
 @Composable
 fun RecommendationScreen(
     state: RecommendationState,
-    genreFilters: List<String>,
-    selectedGenre: String,
+    advancedFilters: AdvancedFilters,
+    onApplyFilters: (AdvancedFilters) -> Unit,
+    onResetFilters: () -> Unit,
+    gridColumns: Int,
+    onToggleGrid: () -> Unit,
     onLoadMore: () -> Unit,
-    onFilterClick: (String) -> Unit,
     onGameClick: (String) -> Unit,
     onSearchClick: () -> Unit,
     onAiAssistantClick: () -> Unit,
     onNavigateToChallenges: () -> Unit,
 ) {
+    var showFilterSheet by remember { mutableStateOf(false) }
 
     GamesListTemplate(
         title = "Recommendation",
         isLoading = state.isLoading,
         games = state.popularGames,
-
-        // Genre
-        filters = genreFilters,
-        selectedFilter = selectedGenre,
-        onFilterClick = onFilterClick,
-
+        gridColumns = gridColumns,
+        onAdvancedFilterClick = { showFilterSheet = true },
+        onToggleGridClick = onToggleGrid,
         // Header With Ai
         headerContent = {
             Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
@@ -132,4 +133,20 @@ fun RecommendationScreen(
         onGameClick = onGameClick,
         onLoadMore = onLoadMore
     )
+    if (showFilterSheet) {
+        AdvancedFiltersScreen(
+            currentFilters = advancedFilters,
+            showDifficultyFilter = false,
+            showBountiesToggle = false,
+            onApply = { newFilters ->
+                onApplyFilters(newFilters)
+                showFilterSheet = false
+            },
+            onReset = {
+                onResetFilters()
+                showFilterSheet = false
+            },
+            onDismiss = { showFilterSheet = false }
+        )
+    }
 }

@@ -93,10 +93,14 @@ class FetchAndSyncRemoteGameUseCase @Inject constructor(
                             description = networkGame.descriptionRaw,
                             screenshots = screens,
                             achievements = achivs,
-                            aiDifficulty = if (aiDiff == AchievementDifficulty.NONE) null else aiDiff.name
+                            aiDifficulty = if (aiDiff == AchievementDifficulty.NONE) null else aiDiff.name,
+                            genres = networkGame.genres.joinToString(","),
+                            platforms = networkGame.platforms.joinToString(",")
                         )
                         gameRepository.saveToCache(cacheDto)
-                    } catch (e: Exception) { /* Игнорируем */ }
+                    } catch (e: Exception) {
+                        Log.e("RAWG_CACHE", "❌ Ошибка кэширования: ${e.message}")
+                    }
 
                     Result.success(RemoteGameData(mergedGame, screens, achivs, aiDiff))
                 } else {

@@ -166,7 +166,7 @@ fun GamerPassportUi(
                 color = Color(0xFFFF9100) // Badass Orange/Gold
             )
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Footer
             Row(

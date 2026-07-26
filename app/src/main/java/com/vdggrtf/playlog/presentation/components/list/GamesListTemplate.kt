@@ -181,7 +181,7 @@ fun GamesListTemplate(
                 }
             } else {
                 items(games) { game ->
-                    GameGridCard(game = game, onClick = { onGameClick(game.id.toString()) })
+                    GameGridCard(game = game, gridColumns = gridColumns, onClick = { onGameClick(game.id.toString()) })
                 }
             }
 

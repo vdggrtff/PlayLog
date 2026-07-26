@@ -17,4 +17,6 @@ interface ChallengeRepository {
     suspend fun getUserChallengeStatuses(): Result<Map<Int, GameStatus>>
 
     suspend fun getChallengesByGameId(gameId: Int): Result<List<CustomChallengeModel>>
+
+    suspend fun getTrackedBountyGameIds(): Result<Set<Int>>
 }

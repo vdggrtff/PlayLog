@@ -36,12 +36,12 @@ import coil.compose.AsyncImage
 import com.vdggrtf.playlog.R
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
 import com.vdggrtf.playlog.domain.model.GameModel
-import com.vdggrtf.playlog.ui.theme.AiAccent
 import com.vdggrtf.playlog.ui.theme.cardColor
 
 @Composable
 fun GameGridCard(
     game: GameModel,
+    gridColumns: Int = 2,
     onClick: () -> Unit,
 ) {
     Card(
@@ -90,58 +90,59 @@ fun GameGridCard(
             }
 
             // bottom pice: text and rating
-            Column(modifier = Modifier.padding(12.dp)) {
-                // Название игры
-                Text(
-                    text = game.name,
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+            if (gridColumns < 4) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = game.name,
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                // rating and year
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // score
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.Star,
-                            contentDescription = null,
-                            tint = Color(0xFFFFC107),
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = game.rating?.toString() ?: stringResource(R.string.n_a),
-                            color = Color(0xFFFFC107),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    if (game.playtime > 0) {
+                    // rating and year
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // score
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.Star,
+                                contentDescription = null,
+                                tint = Color(0xFFFFC107),
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                stringResource(R.string.hours, game.playtime),
-                                color = Color.Gray,
+                                text = game.rating?.toString() ?: stringResource(R.string.n_a),
+                                color = Color(0xFFFFC107),
                                 fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Bold
                             )
                         }
-                    }
 
-                    Text(
-                        text = game.releasedDate?.take(4) ?: "",
-                        color = Color.Gray,
-                        fontSize = 14.sp
-                    )
+                        if (game.playtime > 0) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    stringResource(R.string.hours, game.playtime),
+                                    color = Color.Gray,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+
+                        Text(
+                            text = game.releasedDate?.take(4) ?: "",
+                            color = Color.Gray,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
             }
         }

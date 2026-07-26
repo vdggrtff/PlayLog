@@ -10,6 +10,8 @@ data class GameDto(
     @SerializedName("rating") val rating: Double?,
     @SerializedName("description_raw") val description: String?,
     @SerializedName("playtime") val playtime: Int?,
+    @SerializedName("genres") val genres: List<RawgGenreDto>? = null,
+    @SerializedName("platforms") val platforms: List<RawgPlatformWrapperDto>? = null
 )
 
 

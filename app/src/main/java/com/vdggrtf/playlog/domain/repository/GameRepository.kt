@@ -7,9 +7,20 @@ import com.vdggrtf.playlog.domain.model.GameModel
 
 interface GameRepository {
 
-    suspend fun searchGames(query: String, page: Int = 1): Result<List<GameModel>>
+    suspend fun searchGames(
+        query: String,
+        page: Int = 1,
+        dates: String? = null,
+        genres: String? = null,
+        platforms: String? = null,
+    ): Result<List<GameModel>>
 
-    suspend fun getPopularGames(page: Int = 1): Result<List<GameModel>>
+    suspend fun getPopularGames(
+        page: Int = 1,
+        dates: String? = null,
+        genres: String? = null,
+        platforms: String? = null,
+    ): Result<List<GameModel>>
 
     suspend fun getGameDetails(id: Int): Result<GameModel>
 
