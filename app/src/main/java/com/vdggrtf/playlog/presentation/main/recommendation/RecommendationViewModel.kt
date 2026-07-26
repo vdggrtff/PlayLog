@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.domain.usecase.main.recommendation.GetPopularGamesUseCase
+import com.vdggrtf.playlog.presentation.main.my_library.AdvancedFilters
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +16,8 @@ import javax.inject.Inject
 data class RecommendationState (
     val isLoading: Boolean = false,
     val popularGames: List<GameModel> = emptyList(),
-    val error: String? = null
+    val error: String? = null,
+    val gridColumns: Int = 2,
 )
 
 @HiltViewModel
@@ -23,6 +25,9 @@ class RecommendationViewModel @Inject constructor(private val getPopularGamesUse
 
     private val _state = MutableStateFlow(RecommendationState())
     val state: StateFlow<RecommendationState> = _state.asStateFlow()
+
+    private val _advancedFilters = MutableStateFlow(AdvancedFilters())
+    val advancedFilters = _advancedFilters.asStateFlow()
 
     private var currentPage = 1
 
@@ -35,7 +40,7 @@ class RecommendationViewModel @Inject constructor(private val getPopularGamesUse
             _state.update { it.copy(isLoading = true, error = null) }
 
             // Executing the UseCase like a simple function
-            val result = getPopularGamesUseCase(page = 1)
+            val result = getPopularGamesUseCase(page = 1, filters = _advancedFilters.value)
 
             result.fold(
                 onSuccess = {games ->
@@ -55,7 +60,7 @@ class RecommendationViewModel @Inject constructor(private val getPopularGamesUse
             _state.update { it.copy(isLoading = true) }
             currentPage++
 
-            getPopularGamesUseCase(page = currentPage).fold(
+            getPopularGamesUseCase(page = currentPage, filters = _advancedFilters.value).fold(
                 onSuccess = { newGames ->
                     // merging old and new games!
                     val updatedList = _state.value.popularGames + newGames
@@ -68,5 +73,29 @@ class RecommendationViewModel @Inject constructor(private val getPopularGamesUse
                 }
             )
         }
+    }
+
+    fun toggleGridColumns() {
+        _state.update { currentState ->
+            val nextColumns = when (currentState.gridColumns) {
+                1 -> 2
+                2 -> 4
+                4 -> 1
+                else -> 2
+            }
+            currentState.copy(gridColumns = nextColumns)
+        }
+    }
+
+    fun applyAdvancedFilters(newFilters: AdvancedFilters) {
+        _advancedFilters.value = newFilters
+        currentPage = 1
+        loadPopularGames()
+    }
+
+    fun resetAdvancedFilters() {
+        _advancedFilters.value = AdvancedFilters()
+        currentPage = 1
+        loadPopularGames()
     }
 }

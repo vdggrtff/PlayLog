@@ -3,6 +3,7 @@ package com.vdggrtf.playlog.data.repositoryimpl
 import android.util.Log
 import com.vdggrtf.playlog.data.mapper.toDomainModel
 import com.vdggrtf.playlog.data.network.dto.ChallengeDto
+import com.vdggrtf.playlog.data.network.dto.ChallengeGameIdDto
 import com.vdggrtf.playlog.data.network.dto.ChallengeStatusResponseDto
 import com.vdggrtf.playlog.data.network.dto.ChallengeStatusUpdateDto
 import com.vdggrtf.playlog.domain.model.CustomChallengeModel
@@ -100,5 +101,43 @@ class ChallengeRepositoryImpl @Inject constructor(
             Log.e("ChallengeRepository", "Error fetching challenge statuses: ${e.message}")
             Result.failure(e)
         }
+    }
+
+    override suspend fun getChallengesByGameId(gameId: Int): Result<List<CustomChallengeModel>> {
+        return try {
+            val dtos = supabase.from("custom_challenge")
+                .select { filter { eq("game_id", gameId) } }
+                .decodeList<ChallengeDto>()
+
+            val models = dtos.map { it.toDomainModel() }
+            Result.success(models)
+        } catch (e: Exception){
+            Log.e("ChallengeRepository", "Error downloading challenges games: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getTrackedBountyGameIds(): Result<Set<Int>> {
+        return try {
+            val userStatuses = supabase.from("user_challenge_status")
+                .select( columns = Columns.list("challenge_id, status"))
+                .decodeList<ChallengeStatusResponseDto>()
+
+            val challengesIds = userStatuses.map { it.challengeId }
+            if (challengesIds.isEmpty()) return Result.success(emptySet())
+
+            val challenges = supabase.from("custom_challenge")
+                .select(columns = Columns.list("id, game_id")){
+                    filter { isIn("id", challengesIds) }
+                }.decodeList<ChallengeGameIdDto>()
+
+            val gamesId = challenges.map { it.gameId }.toSet()
+
+            Result.success(gamesId)
+        } catch (e: Exception){
+            Log.e("ChallengeRepository", "Ошибка получения ID игр с контрактами: ${e.message}")
+            Result.failure(e)
+        }
+
     }
 }

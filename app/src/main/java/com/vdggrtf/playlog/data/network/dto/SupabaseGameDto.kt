@@ -16,4 +16,6 @@ data class SupabaseGameDto(
     @SerialName("ai_difficulty") val aiDifficulty: String,
     @SerialName("user_difficulty") val userDifficulty: String,
     @SerialName("verified_difficulty") val verifiedDifficulty: String,
+    @SerialName("genres") val genres: String? = "",
+    @SerialName("platforms") val platforms: String? = ""
 )

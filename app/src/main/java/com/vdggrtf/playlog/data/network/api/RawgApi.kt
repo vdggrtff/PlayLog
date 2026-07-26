@@ -17,6 +17,9 @@ interface RawgApi {
         @Query("order") order: String = "-added",
         @Query("page") page: Int = 1,
         @Query("page_size") pageSize: Int = 40,
+        @Query("dates") dates: String? = null,
+        @Query("genres") genres: String? = null,
+        @Query("parent_platforms") platforms: String? = null
     ): Response<BaseResponse<GameDto>>
 
     @GET("games")
@@ -24,6 +27,9 @@ interface RawgApi {
         @Query("search") query: String,
         @Query("page") page: Int = 1,
         @Query("page_size") pageSize: Int = 40,
+        @Query("dates") dates: String? = null,
+        @Query("genres") genres: String? = null,
+        @Query("parent_platforms") platforms: String? = null
     ): Response<BaseResponse<GameDto>>
 
     @GET("games/{id}")

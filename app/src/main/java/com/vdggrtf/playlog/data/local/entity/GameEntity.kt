@@ -18,6 +18,8 @@ data class GameEntity(
     val aiDifficulty: String,
     val userDifficulty: String,
     val verifiedDifficulty: String,
+    val genresRaw: String = "",
+    val platformsRaw: String = "",
 )
 
 const val DB_NAME = "games_library"

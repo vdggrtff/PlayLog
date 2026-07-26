@@ -17,7 +17,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -26,9 +28,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.vdggrtf.playlog.R
+import com.vdggrtf.playlog.presentation.components.bottom_sheet.AdvancedFiltersScreen
 import com.vdggrtf.playlog.presentation.components.list.GamesListTemplate
+import com.vdggrtf.playlog.presentation.main.my_library.AdvancedFilters
 
 @Composable
 fun SearchRoute(
@@ -37,10 +41,16 @@ fun SearchRoute(
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val advancedFilters by viewModel.advancedFilters.collectAsState()
 
 
     SearchScreen(
         state = state,
+        gridColumns = state.gridColumns,
+        onToggleGrid = { viewModel.toggleGridColumns() },
+        advancedFilters = advancedFilters,
+        onApplyFilters = { newFilters -> viewModel.applyAdvancedFilters(newFilters) },
+        onResetFilters = { viewModel.resetAdvancedFilters() },
         onBack = onBack,
         onGameClick = onGameClick,
         onValueChange = { viewModel.onSearchQueryChange(it) },
@@ -52,12 +62,18 @@ fun SearchRoute(
 @Composable
 fun SearchScreen(
     state: SearchState,
+    advancedFilters: AdvancedFilters,
+    onApplyFilters: (AdvancedFilters) -> Unit,
+    onResetFilters: () -> Unit,
+    gridColumns: Int,
+    onToggleGrid: () -> Unit,
     onBack: () -> Unit,
     onGameClick: (String) -> Unit,
     onValueChange: (String) -> Unit,
     onClear: () -> Unit,
     onLoadMore: () -> Unit,
 ) {
+    var showFilterSheet by remember { mutableStateOf(false) }
 
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
@@ -68,7 +84,9 @@ fun SearchScreen(
         title = "Search",
         isLoading = state.isLoading,
         games = state.searchResult,
-
+        gridColumns = gridColumns,
+        onAdvancedFilterClick = { showFilterSheet = true },
+        onToggleGridClick = onToggleGrid,
         // Header
         headerContent = {
             OutlinedTextField(
@@ -126,5 +144,21 @@ fun SearchScreen(
         onBack = onBack,
         onGameClick = onGameClick
     )
+    if (showFilterSheet) {
+        AdvancedFiltersScreen(
+            currentFilters = advancedFilters,
+            showDifficultyFilter = false,
+            showBountiesToggle = false,
+            onApply = { newFilters ->
+                onApplyFilters(newFilters)
+                showFilterSheet = false
+            },
+            onReset = {
+                onResetFilters()
+                showFilterSheet = false
+            },
+            onDismiss = { showFilterSheet = false }
+        )
+    }
 
 }

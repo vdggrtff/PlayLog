@@ -5,6 +5,7 @@ import com.vdggrtf.playlog.data.local.dao.GameDao
 import com.vdggrtf.playlog.data.local.entity.DB_NAME
 import com.vdggrtf.playlog.data.mapper.toDomainModel
 import com.vdggrtf.playlog.data.mapper.toEntity
+import com.vdggrtf.playlog.data.mapper.toSupabaseDto
 import com.vdggrtf.playlog.data.network.dto.BountyRewardDto
 import com.vdggrtf.playlog.data.network.dto.CompletedBountyDto
 import com.vdggrtf.playlog.data.network.dto.SupabaseGameDto
@@ -56,13 +57,16 @@ class LibraryRepositoryImpl @Inject constructor(
                         }.decodeList<SupabaseGameDto>()
 
                     if (existingGames.isNotEmpty()) {
-                        // game exists! updating status and our three difficulties!
-                        supabase.from("games_library").update(
+                        // game exists! updating status, difficulties AND new marketplace fields!
+                        supabase.from(DB_NAME).update(
                             {
                                 set("status", gameModel.status.name)
                                 set("ai_difficulty", gameModel.aiDifficulty.name)
                                 set("user_difficulty", gameModel.userDifficulty.name)
                                 set("verified_difficulty", gameModel.verifiedDifficulty.name)
+                                // 💥 Updating genres just in case it was saved in an older version of the app!
+                                set("genres", gameModel.genres.joinToString(","))
+                                set("platforms", gameModel.platforms.joinToString(","))
                             }
                         ) {
                             filter {
@@ -75,20 +79,8 @@ class LibraryRepositoryImpl @Inject constructor(
                             "Игра обновлена в облаке! Verified: ${gameModel.verifiedDifficulty.name}"
                         )
                     } else {
-                        // no game! creating a new entry with all data
-                        val newSupabaseGame = SupabaseGameDto(
-                            userId = userId,
-                            gameIdRawg = gameModel.id,
-                            name = gameModel.name,
-                            imageUrl = gameModel.imageUrl ?: "",
-                            status = gameModel.status.name,
-                            rating = gameModel.rating ?: 0.0,
-                            releasedDate = gameModel.releasedDate ?: "",
-                            description = gameModel.descriptionRaw ?: "",
-                            aiDifficulty = gameModel.aiDifficulty.name,
-                            userDifficulty = gameModel.userDifficulty.name,
-                            verifiedDifficulty = gameModel.verifiedDifficulty.name
-                        )
+                        // 💥 CLEAN ARCHITECTURE: Using our new mapper!
+                        val newSupabaseGame = gameModel.toSupabaseDto(userId)
                         supabase.from(DB_NAME).insert(newSupabaseGame)
                         Log.d("SupabaseSync", "Новая игра ${gameModel.name} СОХРАНЕНА в облако!")
                     }
@@ -122,7 +114,7 @@ class LibraryRepositoryImpl @Inject constructor(
                 }.decodeList<SupabaseGameDto>()
 
             Result.success(votes.map { it.userDifficulty })
-        }catch (e: Exception){
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }

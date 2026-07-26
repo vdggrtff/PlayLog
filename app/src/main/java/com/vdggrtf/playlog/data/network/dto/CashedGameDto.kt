@@ -14,5 +14,7 @@ data class CashedGameDto(
     @SerialName("screenshots") val screenshots: List<String>? = null,
     @SerialName("achievements") val achievements: List<AchievementDto>? = null,
     @SerialName("ai_difficulty") val aiDifficulty: String? = null,
+    @SerialName("genres") val genres: String? = null,
+    @SerialName("platforms") val platforms: String? = null
 ) {
 }

@@ -1,4 +1,4 @@
-package com.vdggrtf.playlog.presentation.dialogs
+package com.vdggrtf.playlog.presentation.components.dialogs
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.vdggrtf.playlog.R
+import com.vdggrtf.playlog.R.string
 import com.vdggrtf.playlog.presentation.components.profile.GamerPassportUi
 import com.vdggrtf.playlog.ui.theme.CardBackground
 import com.vdggrtf.playlog.utils.ShareUtils
@@ -56,7 +57,7 @@ fun PassportShareDialog(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                stringResource(R.string.your_id_card),
+                stringResource(string.your_id_card),
                 color = Color.White,
                 fontWeight = FontWeight.Black,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -99,7 +100,7 @@ fun PassportShareDialog(
             Spacer(modifier = Modifier.height(8.dp))
 
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.close), color = Color.Gray)
+                Text(stringResource(string.close), color = Color.Gray)
             }
         }
     }

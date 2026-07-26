@@ -39,10 +39,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.vdggrtf.playlog.R
-import com.vdggrtf.playlog.domain.model.AchievementDifficulty
 import com.vdggrtf.playlog.domain.model.GameStatus
+import com.vdggrtf.playlog.presentation.components.bottom_sheet.AdvancedFiltersScreen
 import com.vdggrtf.playlog.presentation.components.list.GamesListTemplate
 import com.vdggrtf.playlog.presentation.components.mylibrary.FairyHintWithArrow
 import com.vdggrtf.playlog.presentation.components.mylibrary.LibraryHeader
@@ -61,8 +61,8 @@ fun LibraryRoute(
 ) {
     val context = LocalContext.current
     val state by libraryViewModel.state.collectAsState()
+    val advancedFilters by libraryViewModel.advancedFilters.collectAsState()
     val selectedStatus by libraryViewModel.selectedStatus.collectAsState()
-    val selectedDiffFilter by libraryViewModel.selectedDifficultyFilter.collectAsState()
     val scannerStatus by scannerViewModel.statusText.collectAsState()
 
     // 💥 GALLERY LAUNCHER LIVES IN THE ROUTE
@@ -89,14 +89,17 @@ fun LibraryRoute(
     LibraryScreen(
         state = state,
         selectedStatus = selectedStatus,
-        selectedDiffFilter = selectedDiffFilter,
+        gridColumns = state.gridColumns,
+        advancedFilters = advancedFilters,
+        onApplyFilters = { newFilters -> libraryViewModel.applyAdvancedFilters(newFilters)},
+        onResetFilters = { libraryViewModel.resetAdvancedFilters() },
+        onToggleGrid = { libraryViewModel.toggleGridColumns() },
         scannerStatus = scannerStatus,
         onGameClick = onGameClick,
         onNavigateToSearch = onNavigateToSearch,
         onLaunchScanner = { galleryLauncher.launch("image/*") },
         onClearScanner = { scannerViewModel.clearStatus() },
         onFilterStatusChanged = { libraryViewModel.setFilterStatus(it) },
-        onFilterDifficultyChanged = { diff -> libraryViewModel.toggleDifficultyFilter(diff) }
     )
 }
 
@@ -105,20 +108,22 @@ fun LibraryRoute(
 fun LibraryScreen(
     state: LibraryState,
     selectedStatus: GameStatus,
-    selectedDiffFilter: AchievementDifficulty?,
+    advancedFilters: AdvancedFilters,
+    onApplyFilters: (AdvancedFilters) -> Unit,
+    onResetFilters: () -> Unit,
+    gridColumns: Int,
+    onToggleGrid: () -> Unit,
     scannerStatus: String?,
     onGameClick: (String) -> Unit,
     onNavigateToSearch: () -> Unit,
     onLaunchScanner: () -> Unit,
     onClearScanner: () -> Unit,
     onFilterStatusChanged: (GameStatus) -> Unit,
-    onFilterDifficultyChanged: (AchievementDifficulty) -> Unit,
 ) {
     var showAddMenu by remember { mutableStateOf(false) }
 
-    val difficultyFilters = AchievementDifficulty.entries
-        .filter { it != AchievementDifficulty.NONE }
-        .map { it.title.uppercase() }
+    var showFilterSheet by remember { mutableStateOf(false) }
+
 
 
     // scanner dialog (find and add game or not)
@@ -204,29 +209,14 @@ fun LibraryScreen(
         }
     ) { paddingValues ->
         GamesListTemplate(
-            title = "",
+            title = stringResource(R.string.library),
             isLoading = state.isLoading,
             games = state.displayedGames,
-            filters = difficultyFilters,
-            selectedFilter = selectedDiffFilter?.title?.uppercase() ?: "",
-            onFilterClick = { filterName ->
-                // Finding the required Enum by name and passing it to the ViewModel.
-                val diffEnum =
-                    AchievementDifficulty.entries.find { it.title.uppercase() == filterName }
-                if (diffEnum != null) {
-                    onFilterDifficultyChanged(diffEnum)
-                }
-            },
+            gridColumns = gridColumns,
+            onAdvancedFilterClick = { showFilterSheet = true },
+            onToggleGridClick = onToggleGrid,
             headerContent = {
                 Column {
-                    Text(
-                        text = stringResource(R.string.library),
-                        color = Color.White,
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                    )
-
                     // header with the progress bar
                     LibraryHeader(
                         allGames = state.games,
@@ -256,6 +246,21 @@ fun LibraryScreen(
             },
             onGameClick = onGameClick
         )
+        if (showFilterSheet) {
+            AdvancedFiltersScreen(
+                currentFilters = advancedFilters,
+                showDifficultyFilter = true,
+                onApply = { newFilters ->
+                    onApplyFilters(newFilters)
+                    showFilterSheet = false
+                },
+                onReset = {
+                    onResetFilters()
+                    showFilterSheet = false
+                },
+                onDismiss = { showFilterSheet = false }
+            )
+        }
     }
 }
 

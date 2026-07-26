@@ -15,7 +15,6 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -25,9 +24,15 @@ class GameRepositoryImpl @Inject constructor(
     private val cheapSharkApi: CheapSharkApi,
 ) : GameRepository {
 
-    override suspend fun searchGames(query: String, page: Int): Result<List<GameModel>> {
+    override suspend fun searchGames(
+        query: String,
+        page: Int,
+        dates: String?,
+        genres: String?,
+        platforms: String?,
+    ): Result<List<GameModel>> {
         val result = safeApiCall {
-            api.searchGames(query = query, page = page)
+            api.searchGames(query = query, page = page, pageSize = 40, dates = dates, genres = genres, platforms = platforms)
         }
 
         return when (result) {
@@ -42,10 +47,15 @@ class GameRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getPopularGames(page: Int): Result<List<GameModel>> {
+    override suspend fun getPopularGames(
+        page: Int,
+        dates: String?,
+        genres: String?,
+        platforms: String?,
+    ): Result<List<GameModel>> {
 
         val result = safeApiCall {
-            api.getPopularGames(page = page)
+            api.getPopularGames(page = page, dates = dates, genres = genres, platforms = platforms)
         }
 
         return when (result) {

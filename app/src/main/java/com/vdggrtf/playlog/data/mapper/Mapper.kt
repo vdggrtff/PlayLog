@@ -4,6 +4,7 @@ import com.vdggrtf.playlog.data.local.entity.GameEntity
 import com.vdggrtf.playlog.data.network.dto.CashedGameDto
 import com.vdggrtf.playlog.data.network.dto.ChallengeDto
 import com.vdggrtf.playlog.data.network.dto.GameDto
+import com.vdggrtf.playlog.data.network.dto.SupabaseGameDto
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
 import com.vdggrtf.playlog.domain.model.CustomChallengeModel
 import com.vdggrtf.playlog.domain.model.GameModel
@@ -24,6 +25,8 @@ fun GameDto.toDomainModel(): GameModel {
         aiDifficulty = AchievementDifficulty.NONE,
         userDifficulty = AchievementDifficulty.NONE,
         verifiedDifficulty = AchievementDifficulty.NONE,
+        genres = this.genres?.map { it.name } ?: emptyList(),
+        platforms = this.platforms?.map { it.platform.name } ?: emptyList()
     )
 }
 
@@ -57,7 +60,9 @@ fun GameEntity.toDomainModel(): GameModel {
             AchievementDifficulty.valueOf(this.verifiedDifficulty)
         } catch (e: Exception) {
             AchievementDifficulty.NONE
-        }
+        },
+        genres = if (this.genresRaw.isNotBlank()) this.genresRaw.split(",") else emptyList(),
+        platforms = if (this.platformsRaw.isNotBlank()) this.platformsRaw.split(",") else emptyList(),
     )
 }
 
@@ -75,7 +80,28 @@ fun GameModel.toEntity(): GameEntity {
         playtime = this.playtime,
         aiDifficulty = this.aiDifficulty.name,
         userDifficulty = this.userDifficulty.name,
-        verifiedDifficulty = this.verifiedDifficulty.name
+        verifiedDifficulty = this.verifiedDifficulty.name,
+        genresRaw = this.genres.joinToString(","),
+        platformsRaw = this.platforms.joinToString(",")
+    )
+}
+
+fun GameModel.toSupabaseDto(userId: String): SupabaseGameDto {
+    return SupabaseGameDto(
+        userId = userId,
+        gameIdRawg = this.id,
+        name = this.name,
+        imageUrl = this.imageUrl ?: "",
+        status = this.status.name,
+        rating = this.rating ?: 0.0,
+        releasedDate = this.releasedDate ?: "",
+        description = this.descriptionRaw ?: "",
+        aiDifficulty = this.aiDifficulty.name,
+        userDifficulty = this.userDifficulty.name,
+        verifiedDifficulty = this.verifiedDifficulty.name,
+        // 💥 Now it's centralized and safe!
+        genres = this.genres.joinToString(","),
+        platforms = this.platforms.joinToString(",")
     )
 }
 
@@ -91,6 +117,8 @@ fun CashedGameDto.toDomainModel(): GameModel {
         aiDifficulty = AchievementDifficulty.NONE,
         userDifficulty = AchievementDifficulty.NONE,
         verifiedDifficulty = AchievementDifficulty.NONE,
+        genres = this.genres?.split(",")?.filter { it.isNotBlank() }?.map { it.trim() } ?: emptyList(),
+        platforms = this.platforms?.split(",")?.filter { it.isNotBlank() }?.map { it.trim() } ?: emptyList()
     )
 }
 
