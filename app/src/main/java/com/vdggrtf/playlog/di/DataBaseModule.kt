@@ -22,7 +22,8 @@ object DataBaseModule {
             context,
             AppDataBase::class.java,
             DB_NAME,
-        ).build()
+        ).fallbackToDestructiveMigration(dropAllTables = true)
+            .build()
     }
 
     @Provides

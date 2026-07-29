@@ -1,4 +1,4 @@
-package com.vdggrtf.playlog.data.network.dto
+package com.vdggrtf.playlog.data.network.dto.rawg
 
 import com.google.gson.annotations.SerializedName
 import kotlinx.serialization.Serializable

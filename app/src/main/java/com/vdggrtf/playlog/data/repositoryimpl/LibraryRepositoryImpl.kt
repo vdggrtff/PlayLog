@@ -6,9 +6,9 @@ import com.vdggrtf.playlog.data.local.entity.DB_NAME
 import com.vdggrtf.playlog.data.mapper.toDomainModel
 import com.vdggrtf.playlog.data.mapper.toEntity
 import com.vdggrtf.playlog.data.mapper.toSupabaseDto
-import com.vdggrtf.playlog.data.network.dto.BountyRewardDto
-import com.vdggrtf.playlog.data.network.dto.CompletedBountyDto
-import com.vdggrtf.playlog.data.network.dto.SupabaseGameDto
+import com.vdggrtf.playlog.data.network.dto.supabase.BountyRewardDto
+import com.vdggrtf.playlog.data.network.dto.supabase.CompletedBountyDto
+import com.vdggrtf.playlog.data.network.dto.supabase.SupabaseGameDto
 import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.domain.repository.LibraryRepository
 import io.github.jan.supabase.SupabaseClient

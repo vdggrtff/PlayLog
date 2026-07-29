@@ -1,4 +1,4 @@
-package com.vdggrtf.playlog.data.network.dto
+package com.vdggrtf.playlog.data.network.dto.rawg
 
 import com.google.gson.annotations.SerializedName
 
@@ -13,5 +13,3 @@ data class GameDto(
     @SerializedName("genres") val genres: List<RawgGenreDto>? = null,
     @SerializedName("platforms") val platforms: List<RawgPlatformWrapperDto>? = null
 )
-
-

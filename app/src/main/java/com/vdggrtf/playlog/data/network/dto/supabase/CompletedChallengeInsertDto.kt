@@ -1,4 +1,4 @@
-package com.vdggrtf.playlog.data.network.dto
+package com.vdggrtf.playlog.data.network.dto.supabase
 
 import kotlinx.serialization.Serializable
 

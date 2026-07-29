@@ -19,6 +19,12 @@ val rawgUrlKey = localProperties.getProperty("RAWG_URL") ?: ""
 val supabaseUrlKey = localProperties.getProperty("SUPABASE_URL") ?: ""
 val supabaseAnonKey = localProperties.getProperty("SUPABASE_ANON_KEY") ?: ""
 
+val geminiApiKey = localProperties.getProperty("GEMINI_API_KEY") ?: ""
+
+val raUser = localProperties.getProperty("RA_USER") ?: ""
+
+val raApiKey = localProperties.getProperty("RA_API_KEY") ?: ""
+
 
 android {
     namespace = "com.vdggrtf.playlog"
@@ -40,7 +46,9 @@ android {
         buildConfigField("String", "RAWG_URL", "\"$rawgUrlKey\"")
         buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrlKey\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseAnonKey\"")
-        buildConfigField("String", "GEMINI_API_KEY", "\"${localProperties.getProperty("GEMINI_API_KEY") ?: ""}\"")
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+        buildConfigField("String", "RA_USER", "\"$raUser\"")
+        buildConfigField("String", "RA_API_KEY", "\"$raApiKey\"")
     }
 
     buildTypes {

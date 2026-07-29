@@ -1,7 +1,7 @@
 package com.vdggrtf.playlog.domain.usecase.main.library
 
 import android.util.Log
-import com.vdggrtf.playlog.data.network.dto.CompletedIdDto
+import com.vdggrtf.playlog.data.network.dto.supabase.CompletedIdDto
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns

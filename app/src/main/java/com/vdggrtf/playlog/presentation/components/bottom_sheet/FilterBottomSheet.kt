@@ -79,7 +79,7 @@ fun AdvancedFiltersScreen(
     var selectedPlatforms by remember { mutableStateOf(currentFilters.selectedPlatforms) }
 
     val allGenres = listOf("Action", "RPG", "Shooter", "Adventure", "Indie", "Strategy", "Puzzle")
-    val allPlatforms = listOf("PC", "PlayStation", "Xbox", "Nintendo", "Mobile")
+    val allPlatforms = listOf("PC", "PlayStation", "Xbox", "Nintendo", "Mobile", "SEGA", "Atari")
 
     Dialog(
         onDismissRequest = onDismiss,

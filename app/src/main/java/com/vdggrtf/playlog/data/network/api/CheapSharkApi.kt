@@ -1,7 +1,7 @@
 package com.vdggrtf.playlog.data.network.api
 
-import com.vdggrtf.playlog.data.network.dto.CheapSharkDealDto
-import com.vdggrtf.playlog.data.network.dto.CheapSharkGameDto
+import com.vdggrtf.playlog.data.network.dto.cheapshark.CheapSharkDealDto
+import com.vdggrtf.playlog.data.network.dto.cheapshark.CheapSharkGameDto
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query

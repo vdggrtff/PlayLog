@@ -1,10 +1,10 @@
 package com.vdggrtf.playlog.data.mapper
 
 import com.vdggrtf.playlog.data.local.entity.GameEntity
-import com.vdggrtf.playlog.data.network.dto.CashedGameDto
-import com.vdggrtf.playlog.data.network.dto.ChallengeDto
-import com.vdggrtf.playlog.data.network.dto.GameDto
-import com.vdggrtf.playlog.data.network.dto.SupabaseGameDto
+import com.vdggrtf.playlog.data.network.dto.supabase.CashedGameDto
+import com.vdggrtf.playlog.data.network.dto.supabase.ChallengeDto
+import com.vdggrtf.playlog.data.network.dto.rawg.GameDto
+import com.vdggrtf.playlog.data.network.dto.supabase.SupabaseGameDto
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
 import com.vdggrtf.playlog.domain.model.CustomChallengeModel
 import com.vdggrtf.playlog.domain.model.GameModel

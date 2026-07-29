@@ -35,12 +35,14 @@ class GetPopularGamesUseCase @Inject constructor(
 
         val platformsStr = if (filters.selectedPlatforms.isNotEmpty()){
             filters.selectedPlatforms.mapNotNull { platform ->
-                when(platform){
-                    "PC" -> "1"
-                    "PlayStation" -> "2"
-                    "Xbox" -> "3"
-                    "Nintendo" -> "7"
-                    "Mobile" -> "4,8"
+                when (platform.lowercase()){
+                    "pc" -> "1"
+                    "playstation" -> "2"
+                    "xbox" -> "3"
+                    "nintendo" -> "7"
+                    "mobile" -> "4,8"
+                    "sega" -> "11"
+                    "atari" -> "9"
                     else -> null
                 }
             }.joinToString(",")

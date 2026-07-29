@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 import com.vdggrtf.playlog.data.local.dao.GameDao
 import com.vdggrtf.playlog.data.local.entity.GameEntity
 
-@Database(entities = [GameEntity::class], version = 1, exportSchema = false)
+@Database(entities = [GameEntity::class], version = 2, exportSchema = false)
 abstract class AppDataBase : RoomDatabase() {
     abstract fun gameDao(): GameDao
 }
