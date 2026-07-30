@@ -5,8 +5,8 @@ import com.vdggrtf.playlog.data.local.dao.GameDao
 import com.vdggrtf.playlog.data.local.datastore.UserStorage
 import com.vdggrtf.playlog.data.local.entity.DB_NAME
 import com.vdggrtf.playlog.data.local.entity.GameEntity
-import com.vdggrtf.playlog.data.network.dto.SupabaseGameDto
-import com.vdggrtf.playlog.data.network.dto.UserProfileDto
+import com.vdggrtf.playlog.data.network.dto.supabase.SupabaseGameDto
+import com.vdggrtf.playlog.data.network.dto.supabase.UserProfileDto
 import com.vdggrtf.playlog.domain.repository.AuthRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.auth

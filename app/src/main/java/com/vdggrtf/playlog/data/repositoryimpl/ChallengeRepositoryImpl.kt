@@ -2,10 +2,10 @@ package com.vdggrtf.playlog.data.repositoryimpl
 
 import android.util.Log
 import com.vdggrtf.playlog.data.mapper.toDomainModel
-import com.vdggrtf.playlog.data.network.dto.ChallengeDto
-import com.vdggrtf.playlog.data.network.dto.ChallengeGameIdDto
-import com.vdggrtf.playlog.data.network.dto.ChallengeStatusResponseDto
-import com.vdggrtf.playlog.data.network.dto.ChallengeStatusUpdateDto
+import com.vdggrtf.playlog.data.network.dto.supabase.ChallengeDto
+import com.vdggrtf.playlog.data.network.dto.supabase.ChallengeGameIdDto
+import com.vdggrtf.playlog.data.network.dto.supabase.ChallengeStatusResponseDto
+import com.vdggrtf.playlog.data.network.dto.supabase.ChallengeStatusUpdateDto
 import com.vdggrtf.playlog.domain.model.CustomChallengeModel
 import com.vdggrtf.playlog.domain.model.GameStatus
 import com.vdggrtf.playlog.domain.repository.ChallengeRepository

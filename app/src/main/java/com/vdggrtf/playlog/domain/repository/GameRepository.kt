@@ -1,8 +1,8 @@
 package com.vdggrtf.playlog.domain.repository
 
-import com.vdggrtf.playlog.data.network.dto.AchievementDto
-import com.vdggrtf.playlog.data.network.dto.CashedGameDto
-import com.vdggrtf.playlog.data.network.dto.CheapSharkDealDto
+import com.vdggrtf.playlog.data.network.dto.rawg.AchievementDto
+import com.vdggrtf.playlog.data.network.dto.supabase.CashedGameDto
+import com.vdggrtf.playlog.data.network.dto.cheapshark.CheapSharkDealDto
 import com.vdggrtf.playlog.domain.model.GameModel
 
 interface GameRepository {

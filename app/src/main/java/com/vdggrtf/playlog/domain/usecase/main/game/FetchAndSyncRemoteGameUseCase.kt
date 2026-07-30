@@ -2,20 +2,22 @@ package com.vdggrtf.playlog.domain.usecase.main.game
 
 import android.util.Log
 import com.vdggrtf.playlog.data.mapper.toDomainModel
-import com.vdggrtf.playlog.data.network.dto.CashedGameDto
+import com.vdggrtf.playlog.data.network.dto.supabase.CashedGameDto
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
 import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.domain.model.GameStatus
 import com.vdggrtf.playlog.domain.model.RemoteGameData
 import com.vdggrtf.playlog.domain.repository.AiRepository
 import com.vdggrtf.playlog.domain.repository.GameRepository
+import com.vdggrtf.playlog.domain.repository.RetroAchievementsRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
 class FetchAndSyncRemoteGameUseCase @Inject constructor(
     private val gameRepository: GameRepository,
-    private val aiRepository: AiRepository
+    private val aiRepository: AiRepository,
+    private val raRepository: RetroAchievementsRepository,
 ) {
     suspend operator fun invoke(id: Int, localGame: GameModel?): Result<RemoteGameData> {
         return try {
@@ -67,10 +69,18 @@ class FetchAndSyncRemoteGameUseCase @Inject constructor(
 
                 val detailsResult = detailsDef.await()
                 val screens = screensDef.await().getOrNull() ?: emptyList()
-                val achivs = achivDef.await().getOrNull() ?: emptyList()
+                var achivs = achivDef.await().getOrNull() ?: emptyList()
 
                 if (detailsResult.isSuccess) {
                     val networkGame = detailsResult.getOrNull()!!
+
+                    val raAchivs = raRepository.getRetroAchievements(networkGame.name, networkGame.platforms).getOrDefault(emptyList())
+
+                    if (raAchivs.isNotEmpty()) {
+                        Log.d("RetroAchievements", "🔥 Склеиваем ${achivs.size} RAWG ачивок и ${raAchivs.size} Ретро-ачивок!")
+                        achivs = achivs + raAchivs
+                    }
+
 
                     // SMART MERGE #2
                     val mergedGame = networkGame.copy(

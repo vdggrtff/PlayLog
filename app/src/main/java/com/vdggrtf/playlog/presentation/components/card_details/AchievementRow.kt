@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.vdggrtf.playlog.R
-import com.vdggrtf.playlog.data.network.dto.AchievementDto
+import com.vdggrtf.playlog.data.network.dto.rawg.AchievementDto
 
 @Composable
 fun AchievementRow(achievement: AchievementDto) {

@@ -1,6 +1,6 @@
 package com.vdggrtf.playlog.data.network.response
 
-import com.vdggrtf.playlog.data.network.dto.ScreenshotDto
+import com.vdggrtf.playlog.data.network.dto.rawg.ScreenshotDto
 import com.google.gson.annotations.SerializedName
 
 data class ScreenshotResponse(

@@ -71,4 +71,19 @@ object ApiFabric {
             .build()
             .create(CheapSharkApi::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideRetroAchievementsApi(): RetroAchievementsApi {
+        val client = OkHttpClient.Builder()
+            .addInterceptor(RaAuthInterceptor()) // Наш шпион с ключами
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl("https://retroachievements.org/")
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(RetroAchievementsApi::class.java)
+    }
 }

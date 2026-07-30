@@ -1,6 +1,6 @@
 package com.vdggrtf.playlog.data.network.api
 
-import com.vdggrtf.playlog.data.network.dto.GameDto
+import com.vdggrtf.playlog.data.network.dto.rawg.GameDto
 import com.vdggrtf.playlog.data.network.response.AchievementResponse
 import com.vdggrtf.playlog.data.network.response.BaseResponse
 import com.vdggrtf.playlog.data.network.response.ScreenshotResponse

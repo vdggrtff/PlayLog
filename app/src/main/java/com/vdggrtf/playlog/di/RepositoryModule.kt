@@ -5,11 +5,13 @@ import com.vdggrtf.playlog.data.repositoryimpl.AuthRepositoryImpl
 import com.vdggrtf.playlog.data.repositoryimpl.ChallengeRepositoryImpl
 import com.vdggrtf.playlog.data.repositoryimpl.GameRepositoryImpl
 import com.vdggrtf.playlog.data.repositoryimpl.LibraryRepositoryImpl
+import com.vdggrtf.playlog.data.repositoryimpl.RetroAchievementsRepositoryImpl
 import com.vdggrtf.playlog.domain.repository.AiRepository
 import com.vdggrtf.playlog.domain.repository.AuthRepository
 import com.vdggrtf.playlog.domain.repository.ChallengeRepository
 import com.vdggrtf.playlog.domain.repository.GameRepository
 import com.vdggrtf.playlog.domain.repository.LibraryRepository
+import com.vdggrtf.playlog.domain.repository.RetroAchievementsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -50,4 +52,10 @@ abstract class RepositoryModule {
     abstract fun bindChallengeRepository(
         repositoryImpl: ChallengeRepositoryImpl,
     ): ChallengeRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRetroAchievementsRepository(
+        repositoryImpl: RetroAchievementsRepositoryImpl,
+    ): RetroAchievementsRepository
 }

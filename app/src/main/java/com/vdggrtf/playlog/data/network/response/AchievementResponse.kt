@@ -1,6 +1,6 @@
 package com.vdggrtf.playlog.data.network.response
 
-import com.vdggrtf.playlog.data.network.dto.AchievementDto
+import com.vdggrtf.playlog.data.network.dto.rawg.AchievementDto
 import com.google.gson.annotations.SerializedName
 
 data class AchievementResponse(

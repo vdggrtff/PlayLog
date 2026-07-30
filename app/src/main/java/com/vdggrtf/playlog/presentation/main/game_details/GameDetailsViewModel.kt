@@ -3,7 +3,7 @@ package com.vdggrtf.playlog.presentation.main.game_details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.vdggrtf.playlog.data.network.dto.AchievementDto
+import com.vdggrtf.playlog.data.network.dto.rawg.AchievementDto
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
 import com.vdggrtf.playlog.domain.model.CustomChallengeModel
 import com.vdggrtf.playlog.domain.model.GameModel

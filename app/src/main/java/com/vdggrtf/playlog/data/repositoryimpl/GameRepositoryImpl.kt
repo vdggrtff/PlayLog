@@ -4,9 +4,9 @@ import android.util.Log
 import com.vdggrtf.playlog.data.mapper.toDomainModel
 import com.vdggrtf.playlog.data.network.api.CheapSharkApi
 import com.vdggrtf.playlog.data.network.api.RawgApi
-import com.vdggrtf.playlog.data.network.dto.AchievementDto
-import com.vdggrtf.playlog.data.network.dto.CashedGameDto
-import com.vdggrtf.playlog.data.network.dto.CheapSharkDealDto
+import com.vdggrtf.playlog.data.network.dto.rawg.AchievementDto
+import com.vdggrtf.playlog.data.network.dto.supabase.CashedGameDto
+import com.vdggrtf.playlog.data.network.dto.cheapshark.CheapSharkDealDto
 import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.domain.repository.GameRepository
 import com.vdggrtf.playlog.utils.NetworkResult
