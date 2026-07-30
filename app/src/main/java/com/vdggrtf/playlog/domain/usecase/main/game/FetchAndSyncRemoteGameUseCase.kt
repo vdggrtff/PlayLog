@@ -74,13 +74,13 @@ class FetchAndSyncRemoteGameUseCase @Inject constructor(
                 if (detailsResult.isSuccess) {
                     val networkGame = detailsResult.getOrNull()!!
 
-                    if (achivs.isEmpty()) {
-                        val raAchivs = raRepository.getRetroAchievements(networkGame.name, networkGame.platforms).getOrNull()
-                        if (!raAchivs.isNullOrEmpty()) {
-                            achivs = raAchivs
-                            Log.d("RetroAchievements", "🔥 Нашли ${achivs.size} ретро-ачивок для ${networkGame.name}!")
-                        }
+                    val raAchivs = raRepository.getRetroAchievements(networkGame.name, networkGame.platforms).getOrDefault(emptyList())
+
+                    if (raAchivs.isNotEmpty()) {
+                        Log.d("RetroAchievements", "🔥 Склеиваем ${achivs.size} RAWG ачивок и ${raAchivs.size} Ретро-ачивок!")
+                        achivs = achivs + raAchivs
                     }
+
 
                     // SMART MERGE #2
                     val mergedGame = networkGame.copy(
