@@ -1,11 +1,5 @@
 package com.vdggrtf.playlog.presentation.main.my_library
 
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
-import android.os.Build
-import android.provider.MediaStore
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -33,7 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -42,7 +35,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.vdggrtf.playlog.R
 import com.vdggrtf.playlog.domain.model.GameStatus
-import com.vdggrtf.playlog.presentation.components.bottom_sheet.AdvancedFiltersScreen
+import com.vdggrtf.playlog.presentation.components.dialogs.AdvancedFiltersScreen
+import com.vdggrtf.playlog.presentation.components.dialogs.ProofUploadDialog
 import com.vdggrtf.playlog.presentation.components.list.GamesListTemplate
 import com.vdggrtf.playlog.presentation.components.mylibrary.FairyHintWithArrow
 import com.vdggrtf.playlog.presentation.components.mylibrary.LibraryHeader
@@ -50,7 +44,6 @@ import com.vdggrtf.playlog.presentation.main.my_library.scaner.ScannerViewModel
 import com.vdggrtf.playlog.ui.theme.AiAccent
 import com.vdggrtf.playlog.ui.theme.PrimaryPurple
 import com.vdggrtf.playlog.ui.theme.bgColor
-import java.io.ByteArrayOutputStream
 
 @Composable
 fun LibraryRoute(
@@ -59,31 +52,20 @@ fun LibraryRoute(
     libraryViewModel: MyLibraryViewModel = hiltViewModel(),
     scannerViewModel: ScannerViewModel = hiltViewModel(),
 ) {
-    val context = LocalContext.current
     val state by libraryViewModel.state.collectAsState()
     val advancedFilters by libraryViewModel.advancedFilters.collectAsState()
     val selectedStatus by libraryViewModel.selectedStatus.collectAsState()
     val scannerStatus by scannerViewModel.statusText.collectAsState()
+    var showProofDialog by remember { mutableStateOf(false) }
 
     // 💥 GALLERY LAUNCHER LIVES IN THE ROUTE
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        uri?.let {
-            val bitmap = if (Build.VERSION.SDK_INT >= 28) {
-                val source = ImageDecoder.createSource(context.contentResolver, it)
-                ImageDecoder.decodeBitmap(source)
-            } else {
-                MediaStore.Images.Media.getBitmap(context.contentResolver, it)
-            }
-
-            val stream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
-            val byteArray = stream.toByteArray()
-
+    ProofUploadDialog(
+        showDialog = showProofDialog,
+        onDismiss = { showProofDialog = false },
+        onImageReady = { byteArray ->
             scannerViewModel.scanAndImportLibrary(byteArray)
         }
-    }
+    )
 
     // CALLING THE DUMB SCREEN
     LibraryScreen(
@@ -97,7 +79,7 @@ fun LibraryRoute(
         scannerStatus = scannerStatus,
         onGameClick = onGameClick,
         onNavigateToSearch = onNavigateToSearch,
-        onLaunchScanner = { galleryLauncher.launch("image/*") },
+        onLaunchScanner = { showProofDialog = true },
         onClearScanner = { scannerViewModel.clearStatus() },
         onFilterStatusChanged = { libraryViewModel.setFilterStatus(it) },
     )
