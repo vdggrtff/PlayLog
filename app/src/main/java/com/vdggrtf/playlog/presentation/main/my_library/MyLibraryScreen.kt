@@ -10,6 +10,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FolderSpecial
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,6 +38,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.vdggrtf.playlog.R
 import com.vdggrtf.playlog.domain.model.GameStatus
 import com.vdggrtf.playlog.presentation.components.dialogs.AdvancedFiltersScreen
+import com.vdggrtf.playlog.presentation.components.dialogs.CreatePlaylistDialog
 import com.vdggrtf.playlog.presentation.components.dialogs.ProofUploadDialog
 import com.vdggrtf.playlog.presentation.components.list.GamesListTemplate
 import com.vdggrtf.playlog.presentation.components.mylibrary.FairyHintWithArrow
@@ -57,6 +60,15 @@ fun LibraryRoute(
     val selectedStatus by libraryViewModel.selectedStatus.collectAsState()
     val scannerStatus by scannerViewModel.statusText.collectAsState()
     var showProofDialog by remember { mutableStateOf(false) }
+    var showPlaylistDialog by remember { mutableStateOf(false) }
+
+    CreatePlaylistDialog(
+        showDialog = showPlaylistDialog,
+        onDismiss = { showPlaylistDialog = false },
+        onCreate = { title, desc ->
+            libraryViewModel.createNewPlayList(title, desc)
+        }
+    )
 
     // 💥 GALLERY LAUNCHER LIVES IN THE ROUTE
     ProofUploadDialog(
@@ -82,6 +94,7 @@ fun LibraryRoute(
         onLaunchScanner = { showProofDialog = true },
         onClearScanner = { scannerViewModel.clearStatus() },
         onFilterStatusChanged = { libraryViewModel.setFilterStatus(it) },
+        onCreatePlaylistClick = { showPlaylistDialog = true }
     )
 }
 
@@ -101,6 +114,7 @@ fun LibraryScreen(
     onLaunchScanner: () -> Unit,
     onClearScanner: () -> Unit,
     onFilterStatusChanged: (GameStatus) -> Unit,
+    onCreatePlaylistClick: () -> Unit,
 ) {
     var showAddMenu by remember { mutableStateOf(false) }
 
@@ -150,6 +164,17 @@ fun LibraryScreen(
         floatingActionButton = {
             // FAB
             Column(horizontalAlignment = Alignment.End) {
+                // create playlist
+                FloatingActionButton(
+                    onClick = {
+                        showAddMenu = false
+                        onCreatePlaylistClick()
+                    },
+                    containerColor = PrimaryPurple,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                ) {
+                    Icon(Icons.Default.FolderSpecial, contentDescription = "New Playlist", tint = Color.White)
+                }
                 // showing two options (AI and Manual)
                 if (showAddMenu) {
                     FloatingActionButton(
@@ -181,11 +206,7 @@ fun LibraryScreen(
                     containerColor = PrimaryPurple,
                     shape = CircleShape
                 ) {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = stringResource(R.string.add_game),
-                        tint = Color.White
-                    )
+                    Icon(if (showAddMenu) Icons.Default.Close else Icons.Default.Add, contentDescription = "Add", tint = Color.White)
                 }
             }
         }

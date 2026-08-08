@@ -35,6 +35,35 @@ object ApiFabric {
 
     @Provides
     @Singleton
+    fun provideTwitchAuthApi(): TwitchAuthApi {
+        return Retrofit.Builder()
+            .baseUrl("https://id.twitch.tv/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(TwitchAuthApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideIgdbApi(twitchAuthApi: TwitchAuthApi): IgdbApi {
+        // Создаем наш умный интерцептор, передаем ему API Твича
+        val igdbInterceptor = IgdbAuthInterceptor(twitchAuthApi)
+
+        // Создаем отдельный клиент, который будет сам подклеивать токены
+        val igdbClient = OkHttpClient.Builder()
+            .addInterceptor(igdbInterceptor)
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl("https://api.igdb.com/") // 💥 Базовый URL Амазона
+            .client(igdbClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(IgdbApi::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BuildConfig.RAWG_URL)

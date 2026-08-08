@@ -3,7 +3,11 @@ package com.vdggrtf.playlog.presentation.main.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
+import com.vdggrtf.playlog.domain.model.PlaylistModel
 import com.vdggrtf.playlog.domain.usecase.main.library.GetCompletedBountiesCountUseCase
+import com.vdggrtf.playlog.domain.usecase.main.playlist.CreatePlaylistUseCase
+import com.vdggrtf.playlog.domain.usecase.main.playlist.ObserveMyPlaylistsUseCase
+import com.vdggrtf.playlog.domain.usecase.main.playlist.SyncPlaylistsUseCase
 import com.vdggrtf.playlog.domain.usecase.main.profile.GetTotalBountyXpUseCase
 import com.vdggrtf.playlog.domain.usecase.main.profile.LogoutUseCase
 import com.vdggrtf.playlog.domain.usecase.main.profile.ObserveCachedUserUseCase
@@ -30,6 +34,7 @@ data class ProfileState(
     val customChallengeCount: Int = 0,
     val favDifficulty: String = "N/A",
     val totalBounty: Int = 0,
+    val myPlaylists: List<PlaylistModel> = emptyList(),
 )
 
 
@@ -40,6 +45,9 @@ class ProfileViewModel @Inject constructor(
     private val observeProfileStatsUseCase: ObserveProfileStatsUseCase,
     private val getTotalBountyXpUseCase: GetTotalBountyXpUseCase,
     private val getCompletedBountiesCountUseCase: GetCompletedBountiesCountUseCase,
+    private val observeMyPlaylistsUseCase: ObserveMyPlaylistsUseCase,
+    private val syncPlaylistsUseCase: SyncPlaylistsUseCase,
+    private val createPlaylistUseCase: CreatePlaylistUseCase,
     private val logoutUseCase: LogoutUseCase,
 ) : ViewModel() {
 
@@ -75,6 +83,18 @@ class ProfileViewModel @Inject constructor(
             }
         }
 
+        // 💥 Слушаем локальные плейлисты из Room
+        viewModelScope.launch {
+            observeMyPlaylistsUseCase().collect { playlists ->
+                _state.update {
+                    it.copy(myPlaylists = playlists)
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            syncPlaylistsUseCase()
+        }
 
         calculateTotalBounty()
     }

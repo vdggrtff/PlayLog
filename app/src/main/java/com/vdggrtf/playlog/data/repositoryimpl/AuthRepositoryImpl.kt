@@ -3,7 +3,7 @@ package com.vdggrtf.playlog.data.repositoryimpl
 import android.util.Log
 import com.vdggrtf.playlog.data.local.dao.GameDao
 import com.vdggrtf.playlog.data.local.datastore.UserStorage
-import com.vdggrtf.playlog.data.local.entity.DB_NAME
+import com.vdggrtf.playlog.data.local.entity.GAME_DB_NAME
 import com.vdggrtf.playlog.data.local.entity.GameEntity
 import com.vdggrtf.playlog.data.network.dto.supabase.SupabaseGameDto
 import com.vdggrtf.playlog.data.network.dto.supabase.UserProfileDto
@@ -62,7 +62,7 @@ class AuthRepositoryImpl @Inject constructor(
                     Log.i("SupabaseSync", "Clear old db and load new data...")
                     dao.clearAllGames()
 
-                    val cloudGames = supabase.from(DB_NAME)
+                    val cloudGames = supabase.from(GAME_DB_NAME)
                         .select { filter { eq("user_id", user.id) } }
                         .decodeList<SupabaseGameDto>()
 

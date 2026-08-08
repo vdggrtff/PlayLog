@@ -2,7 +2,7 @@ package com.vdggrtf.playlog.domain.usecase.main.game
 
 import android.util.Log
 import com.vdggrtf.playlog.data.mapper.toDomainModel
-import com.vdggrtf.playlog.data.network.dto.supabase.CashedGameDto
+import com.vdggrtf.playlog.data.network.dto.supabase.challenges.CashedGameDto
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
 import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.domain.model.GameStatus

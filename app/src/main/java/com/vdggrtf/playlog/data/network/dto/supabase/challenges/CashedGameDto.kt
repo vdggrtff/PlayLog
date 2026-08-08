@@ -1,4 +1,4 @@
-package com.vdggrtf.playlog.data.network.dto.supabase
+package com.vdggrtf.playlog.data.network.dto.supabase.challenges
 
 import com.vdggrtf.playlog.data.network.dto.rawg.AchievementDto
 import kotlinx.serialization.SerialName

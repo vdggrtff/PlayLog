@@ -9,6 +9,7 @@ import com.vdggrtf.playlog.domain.model.GameStatus
 import com.vdggrtf.playlog.domain.usecase.main.challenge.GetTrackedBountyGameIdsUseCase
 import com.vdggrtf.playlog.domain.usecase.main.library.GetCompletedBountiesCountUseCase
 import com.vdggrtf.playlog.domain.usecase.main.library.ObserveMyLibraryUseCase
+import com.vdggrtf.playlog.domain.usecase.main.playlist.CreatePlaylistUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +19,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.collections.filter
 
 data class AdvancedFilters(
     val ratingRange: ClosedFloatingPointRange<Float> = 0f..5f,
@@ -42,6 +42,7 @@ class MyLibraryViewModel @Inject constructor(
     private val observeMyLibraryUseCase: ObserveMyLibraryUseCase,
     private val getCompletedBountiesCountUseCase: GetCompletedBountiesCountUseCase,
     private val getTrackedBountyGameIdsUseCase: GetTrackedBountyGameIdsUseCase,
+    private val createPlaylistUseCase: CreatePlaylistUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LibraryState())
@@ -176,6 +177,19 @@ class MyLibraryViewModel @Inject constructor(
                 else -> 2
             }
             currentState.copy(gridColumns = nextColumns)
+        }
+    }
+
+    fun createNewPlayList(title: String, description: String){
+        viewModelScope.launch {
+            createPlaylistUseCase(title, description).fold(
+                onSuccess = {playlist ->
+                    Log.d("Library", "Плейлист $title успешно создан!")
+                },
+                onFailure = { e ->
+                    Log.e("Library", "Ошибка создания плейлиста: ${e.message}")
+                }
+            )
         }
     }
 

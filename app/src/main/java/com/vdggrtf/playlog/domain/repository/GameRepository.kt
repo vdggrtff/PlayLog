@@ -1,7 +1,7 @@
 package com.vdggrtf.playlog.domain.repository
 
 import com.vdggrtf.playlog.data.network.dto.rawg.AchievementDto
-import com.vdggrtf.playlog.data.network.dto.supabase.CashedGameDto
+import com.vdggrtf.playlog.data.network.dto.supabase.challenges.CashedGameDto
 import com.vdggrtf.playlog.data.network.dto.cheapshark.CheapSharkDealDto
 import com.vdggrtf.playlog.domain.model.GameModel
 
@@ -22,7 +22,7 @@ interface GameRepository {
         platforms: String? = null,
     ): Result<List<GameModel>>
 
-    suspend fun getGameDetails(id: Int): Result<GameModel>
+    suspend fun getGameDetails(gameId: Int): Result<GameModel>
 
     suspend fun getScreenshots(id: Int): Result<List<String>>
 
