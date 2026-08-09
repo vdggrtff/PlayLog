@@ -47,6 +47,7 @@ import com.vdggrtf.playlog.presentation.components.dialogs.AdvancedFiltersScreen
 import com.vdggrtf.playlog.presentation.components.list.GamesListTemplate
 import com.vdggrtf.playlog.presentation.components.tabs.DiscoveryWidgetsRow
 import com.vdggrtf.playlog.presentation.main.my_library.AdvancedFilters
+import com.vdggrtf.playlog.ui.theme.Background
 import com.vdggrtf.playlog.ui.theme.CardBackground
 
 @Composable
@@ -170,7 +171,7 @@ fun RecommendationScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0F0F14)) // Твой Background
+            .background(Background) // Твой Background
             .statusBarsPadding()
             .verticalScroll(rememberScrollState()) // 💥 Весь экран скроллится!
             .padding(bottom = 100.dp)

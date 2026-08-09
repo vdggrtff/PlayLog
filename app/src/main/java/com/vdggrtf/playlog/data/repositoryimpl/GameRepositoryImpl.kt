@@ -41,11 +41,22 @@ class GameRepositoryImpl @Inject constructor(
         return try {
             val offset = (page - 1) * 40
 
+            var filterClause = "cover != null"
+            if (!dates.isNullOrBlank()) filterClause += " & $dates"
+            if (!genres.isNullOrBlank()) filterClause += " & genres = ($genres)"
+            if (!platforms.isNullOrBlank()) filterClause += " & platforms = ($platforms)"
+
+
             // В IGDB поиск работает невероятно круто через слово search!
-            val apicalypseQuery = "search \"$query\"; $baseFields where cover != null; limit 40; offset $offset;"
+            val apicalypseQuery = "search \"$query\"; $baseFields where $filterClause; limit 40; offset $offset;"
 
             val requestBody = apicalypseQuery.toRequestBody("text/plain".toMediaTypeOrNull())
             val response = api.getGames(requestBody)
+
+            Log.e("IGDB_ERROR", "Popular Error $apicalypseQuery")
+            Log.e("IGDB_ERROR", "Popular Error $requestBody")
+            Log.e("IGDB_ERROR", "Popular Error $response")
+
             if (response.isSuccessful){
                 val games = response.body()?.map { it.toDomainModel() } ?: emptyList()
                 Result.success(games)
