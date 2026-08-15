@@ -2,6 +2,7 @@ package com.vdggrtf.playlog.presentation.components.card
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,8 +15,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -36,13 +39,14 @@ import coil.compose.AsyncImage
 import com.vdggrtf.playlog.R
 import com.vdggrtf.playlog.domain.model.AchievementDifficulty
 import com.vdggrtf.playlog.domain.model.GameModel
+import com.vdggrtf.playlog.ui.theme.AiAccent
 import com.vdggrtf.playlog.ui.theme.cardColor
 
 @Composable
 fun GameGridCard(
     game: GameModel,
     gridColumns: Int = 2,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -52,6 +56,9 @@ fun GameGridCard(
             .clickable { onClick() }
     ) {
         Column {
+            // ==========================================
+            // ВЕРХНЯЯ ЧАСТЬ: ПОСТЕР И БЕЙДЖИ
+            // ==========================================
             Box {
                 AsyncImage(
                     model = game.imageUrl,
@@ -63,86 +70,109 @@ fun GameGridCard(
                         .background(Color.DarkGray)
                 )
 
+                // 💥 1. КРУЖОК РЕЙТИНГА ОТ СТИЧА (Слева вверху)
+                val score = (game.rating ?: 0.0).toInt()
+                if (score > 0) {
+                    val scoreColor = when {
+                        score >= 80 -> AiAccent // Голубой шедевр
+                        score >= 50 -> Color(0xFFFF9800) // Оранжевый середняк
+                        else -> Color(0xFFFF1744) // Красный мусор
+                    }
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(8.dp)
+                            .size(34.dp)
+                            .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                            .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = score.toString(),
+                            color = scoreColor, // Цифра будет светиться цветом оценки!
+                            fontWeight = FontWeight.Black,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+
+                // 💥 2. ТВОИ ИКОНКИ СЛОЖНОСТИ (Справа вверху)
                 val activeDifficulty = if (game.verifiedDifficulty != AchievementDifficulty.NONE) {
                     game.verifiedDifficulty
                 } else if (game.aiDifficulty != AchievementDifficulty.NONE) {
                     game.aiDifficulty
-                } else {
-                    null
-                }
+                } else null
 
                 if (activeDifficulty != null) {
-                    Row(
+                    Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(8.dp)
                             .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
                             .padding(horizontal = 6.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        contentAlignment = Alignment.Center
                     ) {
                         Image(
                             painter = painterResource(id = activeDifficulty.emoji),
                             contentDescription = activeDifficulty.title,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
             }
 
-            // bottom pice: text and rating
+            // ==========================================
+            // НИЖНЯЯ ЧАСТЬ: ИМЯ И КИБЕР-ДАТА
+            // ==========================================
             if (gridColumns < 4) {
                 Column(modifier = Modifier.padding(12.dp)) {
-                    Text(
-                        text = game.name,
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // rating and year
+                    // 💥 3. КИБЕРПАНК ПРЕФИКС ГОДА (SYS_YR)
+                    val year = game.releasedDate?.take(4) ?: "UNKNOWN"
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // score
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Default.Star,
-                                contentDescription = null,
-                                tint = Color(0xFFFFC107),
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Box(modifier = Modifier.size(6.dp).background(AiAccent, CircleShape))
+                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = game.rating?.toString() ?: stringResource(R.string.n_a),
-                                color = Color(0xFFFFC107),
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
+                                text = "SYS_YR: $year",
+                                color = AiAccent,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.sp
                             )
                         }
 
+                        // Если есть часы прохождения - аккуратно выводим их справа
                         if (game.playtime > 0) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Schedule, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(10.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    stringResource(R.string.hours, game.playtime),
+                                    text = "${game.playtime}h",
                                     color = Color.Gray,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Medium
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
                         }
-
-                        Text(
-                            text = game.releasedDate?.take(4) ?: "",
-                            color = Color.Gray,
-                            fontSize = 14.sp
-                        )
                     }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // Название игры (Сделал maxLines = 2, так как мы освободили место!)
+                    Text(
+                        text = game.name,
+                        color = Color.White,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        lineHeight = 18.sp
+                    )
                 }
             }
         }

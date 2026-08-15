@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.vdggrtf.playlog.R
-import com.vdggrtf.playlog.presentation.components.bottom_sheet.AdvancedFiltersScreen
+import com.vdggrtf.playlog.presentation.components.dialogs.AdvancedFiltersScreen
 import com.vdggrtf.playlog.presentation.components.list.GamesListTemplate
 import com.vdggrtf.playlog.presentation.main.my_library.AdvancedFilters
 

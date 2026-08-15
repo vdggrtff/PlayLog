@@ -25,6 +25,10 @@ val raUser = localProperties.getProperty("RA_USER") ?: ""
 
 val raApiKey = localProperties.getProperty("RA_API_KEY") ?: ""
 
+val igdbClientId = localProperties.getProperty("IGDB_CLIENT_ID") ?: ""
+
+val igdbClientSecret = localProperties.getProperty("IGDB_CLIENT_SECRET") ?: ""
+
 
 android {
     namespace = "com.vdggrtf.playlog"
@@ -49,6 +53,8 @@ android {
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
         buildConfigField("String", "RA_USER", "\"$raUser\"")
         buildConfigField("String", "RA_API_KEY", "\"$raApiKey\"")
+        buildConfigField("String", "IGDB_CLIENT_ID", "\"$igdbClientId\"")
+        buildConfigField("String", "IGDB_CLIENT_SECRET", "\"$igdbClientSecret\"")
     }
 
     buildTypes {

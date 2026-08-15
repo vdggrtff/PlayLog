@@ -1,9 +1,9 @@
-package com.vdggrtf.playlog.data.network.dto.supabase
+package com.vdggrtf.playlog.data.network.dto.supabase.challenges
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CompletedIdDto(
+data class CompletedBountyDto(
     @SerialName("challenge_id") val challengeId: Int
 )

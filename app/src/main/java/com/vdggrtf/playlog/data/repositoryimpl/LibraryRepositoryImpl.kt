@@ -2,12 +2,12 @@ package com.vdggrtf.playlog.data.repositoryimpl
 
 import android.util.Log
 import com.vdggrtf.playlog.data.local.dao.GameDao
-import com.vdggrtf.playlog.data.local.entity.DB_NAME
+import com.vdggrtf.playlog.data.local.entity.GAME_DB_NAME
 import com.vdggrtf.playlog.data.mapper.toDomainModel
 import com.vdggrtf.playlog.data.mapper.toEntity
 import com.vdggrtf.playlog.data.mapper.toSupabaseDto
-import com.vdggrtf.playlog.data.network.dto.supabase.BountyRewardDto
-import com.vdggrtf.playlog.data.network.dto.supabase.CompletedBountyDto
+import com.vdggrtf.playlog.data.network.dto.supabase.challenges.BountyRewardDto
+import com.vdggrtf.playlog.data.network.dto.supabase.challenges.CompletedBountyDto
 import com.vdggrtf.playlog.data.network.dto.supabase.SupabaseGameDto
 import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.domain.repository.LibraryRepository
@@ -48,7 +48,7 @@ class LibraryRepositoryImpl @Inject constructor(
                     val userId = session.user?.id ?: return@withContext
 
                     // step 1: checking if this game is already in the cloud
-                    val existingGames = supabase.from(DB_NAME)
+                    val existingGames = supabase.from(GAME_DB_NAME)
                         .select {
                             filter {
                                 eq("user_id", userId)
@@ -58,7 +58,7 @@ class LibraryRepositoryImpl @Inject constructor(
 
                     if (existingGames.isNotEmpty()) {
                         // game exists! updating status, difficulties AND new marketplace fields!
-                        supabase.from(DB_NAME).update(
+                        supabase.from(GAME_DB_NAME).update(
                             {
                                 set("status", gameModel.status.name)
                                 set("ai_difficulty", gameModel.aiDifficulty.name)
@@ -81,7 +81,7 @@ class LibraryRepositoryImpl @Inject constructor(
                     } else {
                         // 💥 CLEAN ARCHITECTURE: Using our new mapper!
                         val newSupabaseGame = gameModel.toSupabaseDto(userId)
-                        supabase.from(DB_NAME).insert(newSupabaseGame)
+                        supabase.from(GAME_DB_NAME).insert(newSupabaseGame)
                         Log.d("SupabaseSync", "Новая игра ${gameModel.name} СОХРАНЕНА в облако!")
                     }
                 }
@@ -148,6 +148,12 @@ class LibraryRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Log.e("ProfileVM", "Ошибка подсчета Bounty: ${e.message}")
             0
+        }
+    }
+
+    override fun getGamesForPlaylist(playlistId: String): Flow<List<GameModel>> {
+        return dao.getGamesForPlaylist(playlistId).map { entities ->
+            entities.map { it.toDomainModel() }
         }
     }
 

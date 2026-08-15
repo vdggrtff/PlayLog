@@ -3,7 +3,7 @@ package com.vdggrtf.playlog.data.local.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = DB_NAME)
+@Entity(tableName = GAME_DB_NAME)
 data class GameEntity(
     @PrimaryKey val id: Int,
     val name: String,
@@ -22,4 +22,4 @@ data class GameEntity(
     val platformsRaw: String = "",
 )
 
-const val DB_NAME = "games_library"
+const val GAME_DB_NAME = "games_library"
