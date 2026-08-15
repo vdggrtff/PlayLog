@@ -54,6 +54,7 @@ import com.vdggrtf.playlog.presentation.components.card_details.StoreLinksRow
 import com.vdggrtf.playlog.presentation.components.carousel.BountiesCarousel
 import com.vdggrtf.playlog.presentation.components.dialogs.AiVerificationDialogs
 import com.vdggrtf.playlog.presentation.components.dialogs.ProofUploadDialog
+import com.vdggrtf.playlog.presentation.components.dialogs.SelectPlaylistDialog
 import com.vdggrtf.playlog.presentation.components.dialogs.UserRatingDialog
 import com.vdggrtf.playlog.presentation.main.my_library.scaner.VerificationViewModel
 import com.vdggrtf.playlog.ui.theme.Background
@@ -68,6 +69,7 @@ fun GameDetailsRoute(
     val gameState by gameViewModel.state.collectAsState()
     val verificationState by verificationViewModel.state.collectAsState()
     var showProofDialog by remember { mutableStateOf(false) }
+    var showPlaylistDialog by remember { mutableStateOf(false) }
 
     if (gameState.isLoading) {
         Box(
@@ -116,13 +118,22 @@ fun GameDetailsRoute(
         }
     )
 
+    SelectPlaylistDialog(
+        showDialog = showPlaylistDialog,
+        playlists = gameState.myPlaylists,
+        onDismiss = { showPlaylistDialog = false },
+        onPlaylistSelected = { playlistId -> gameViewModel.addGameToPlaylist(playlistId) }
+    )
+
+
     GameDetailsScreen(
         gameState = gameState,
         game = game,
         onBackClick = onBackClick,
         onProveClick = { showProofDialog = true }, // Команда открыть галерею
         onRetryAiClick = { gameViewModel.retryAiEvaluation() }, // Команда перепнуть ИИ
-        onUpdateStatus = { newStatus -> gameViewModel.updateCurrentStatus(newStatus) }
+        onUpdateStatus = { newStatus -> gameViewModel.updateCurrentStatus(newStatus) },
+        onAddToPlaylistClick = { showPlaylistDialog = true }
     )
 }
 
@@ -135,6 +146,7 @@ fun GameDetailsScreen(
     onProveClick: () -> Unit,
     onRetryAiClick: () -> Unit,
     onUpdateStatus: (GameStatus) -> Unit,
+    onAddToPlaylistClick: () -> Unit,
 ) {
 
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -268,7 +280,8 @@ fun GameDetailsScreen(
             gameState = gameState,
             onDismiss = { showBottomBar = false },
             onUpdateStatus = onUpdateStatus,
-            onProveClick = onProveClick
+            onProveClick = onProveClick,
+            onAddToPlaylistClick = onAddToPlaylistClick // 💥 ПРОКИДЫВАЕМ ДАЛЬШЕ
         )
     }
 }

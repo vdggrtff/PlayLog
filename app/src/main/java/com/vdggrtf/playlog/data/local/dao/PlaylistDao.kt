@@ -27,6 +27,9 @@ interface PlaylistDao {
     @Query("DELETE FROM playlists WHERE id = :playlistId")
     suspend fun deletePlaylist(playlistId: String)
 
+    @Query("DELETE FROM playlist_games WHERE playlistId = :playlistId AND gameId = :gameId")
+    suspend fun removeGameFromPlaylist(playlistId: String, gameId: Int)
+
     @Query("DELETE FROM playlists")
     suspend fun clearAllPlaylists()
 

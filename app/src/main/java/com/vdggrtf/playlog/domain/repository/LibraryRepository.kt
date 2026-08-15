@@ -17,5 +17,7 @@ interface LibraryRepository {
 
     suspend fun getTotalBounty(): Int
 
+    fun getGamesForPlaylist(playlistId: String): Flow<List<GameModel>>
+
     suspend fun clearLocalDatabase()
 }

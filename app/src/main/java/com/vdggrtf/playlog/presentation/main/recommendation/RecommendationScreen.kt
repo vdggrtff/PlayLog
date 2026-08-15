@@ -56,10 +56,14 @@ fun RecommendationRoute(
     onSearchClick: () -> Unit,
     onAiAssistantClick: () -> Unit,
     onNavigateToChallenges: () -> Unit,
+    onNavigateToSeeAll: (String) -> Unit,
+    onNavigateToPlaylist: (String) -> Unit,
     viewModel: RecommendationViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
     val advancedFilters by viewModel.advancedFilters.collectAsState()
+
+    var showFilterSheet by remember { mutableStateOf(false) }
 
 
     RecommendationScreen(
@@ -68,106 +72,42 @@ fun RecommendationRoute(
         onSearchClick = onSearchClick,
         onAiAssistantClick = onAiAssistantClick,
         onNavigateToChallenges = onNavigateToChallenges,
-        onLoadMore = { viewModel.loadMoreGames() },
-        gridColumns = state.gridColumns,
-        onToggleGrid = { viewModel.toggleGridColumns() },
-        advancedFilters = advancedFilters,
-        onApplyFilters = { newFilters -> viewModel.applyAdvancedFilters(newFilters) },
-        onResetFilters = { viewModel.resetAdvancedFilters() },
-        playlists = emptyList(),
-        onSeeAllPopularClick = {},
-        onPlaylistClick = {}
+        playlists = state.playlists,
+        onSeeAllPopularClick = { onNavigateToSeeAll("popular") },
+        onPlaylistClick = { playlistId -> onNavigateToPlaylist(playlistId) },
+        onSeeAllIndieClick = {onNavigateToSeeAll("indie")}
     )
+
+    if (showFilterSheet) {
+        AdvancedFiltersScreen(
+            currentFilters = advancedFilters,
+            showDifficultyFilter = false, // Отключаем, ИИ еще не проверил эти игры
+            showBountiesToggle = false,   // Отключаем, это глобальная база
+            onApply = { newFilters ->
+                viewModel.applyAdvancedFilters(newFilters)
+                showFilterSheet = false
+            },
+            onReset = {
+                viewModel.resetAdvancedFilters()
+                showFilterSheet = false
+            },
+            onDismiss = { showFilterSheet = false }
+        )
+    }
 }
 
 @Composable
 fun RecommendationScreen(
     state: RecommendationState,
     playlists: List<PlaylistModel>,
-    advancedFilters: AdvancedFilters,
-    onApplyFilters: (AdvancedFilters) -> Unit,
-    onResetFilters: () -> Unit,
-    gridColumns: Int,
-    onToggleGrid: () -> Unit,
-    onLoadMore: () -> Unit,
     onGameClick: (String) -> Unit,
     onSearchClick: () -> Unit,
     onAiAssistantClick: () -> Unit,
     onNavigateToChallenges: () -> Unit,
     onSeeAllPopularClick: () -> Unit,
+    onSeeAllIndieClick: () -> Unit,
     onPlaylistClick: (String) -> Unit,
     ) {
-    /*var showFilterSheet by remember { mutableStateOf(false) }
-
-    GamesListTemplate(
-        title = "Recommendation",
-        isLoading = state.isLoading,
-        games = state.popularGames,
-        gridColumns = gridColumns,
-        onAdvancedFilterClick = { showFilterSheet = true },
-        onToggleGridClick = onToggleGrid,
-        // Header With Ai
-        headerContent = {
-            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-
-                // Search
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(CardBackground)
-                        .clickable { onSearchClick() }
-                        .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray)
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            stringResource(R.string.find_game),
-                            color = Color.Gray,
-                            fontSize = 16.sp
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // ai banner
-                DiscoveryWidgetsRow(
-                    onAiHelperClick = { onAiAssistantClick() },
-                    onChallengesClick = { onNavigateToChallenges() } // Переход на новый экран челленджей!
-                )
-            }
-        },
-
-        emptyStateContent = {
-            Box(Modifier.fillMaxSize(), Alignment.Center) {
-                Text(stringResource(R.string.games_not_found), color = Color.Gray)
-            }
-        },
-
-        onBack = null,
-        onGameClick = onGameClick,
-        onLoadMore = onLoadMore
-    )
-    if (showFilterSheet) {
-        AdvancedFiltersScreen(
-            currentFilters = advancedFilters,
-            showDifficultyFilter = false,
-            showBountiesToggle = false,
-            onApply = { newFilters ->
-                onApplyFilters(newFilters)
-                showFilterSheet = false
-            },
-            onReset = {
-                onResetFilters()
-                showFilterSheet = false
-            },
-            onDismiss = { showFilterSheet = false }
-        )
-    }*/
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -250,6 +190,21 @@ fun RecommendationScreen(
                     items(state.popularGames) { game ->
                         GameCarouselCard(game = game, onClick = { onGameClick(game.id.toString()) })
                     }
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(32.dp))
+
+        DashboardSection(
+            title = "👾 Indie Gems",
+            onSeeAllClick = { onSeeAllIndieClick() }
+        ) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp)
+            ) {
+                items(state.indieGames) { game ->
+                    GameCarouselCard(game = game, onClick = { onGameClick(game.id.toString()) })
                 }
             }
         }

@@ -32,4 +32,11 @@ interface GameDao {
 
     @Query("SELECT * FROM $GAME_DB_NAME WHERE id = :gameId LIMIT 1")
     fun getGameByIdSync(gameId: Int): GameEntity?
+
+    @Query("""
+        SELECT games_library.* FROM games_library 
+        INNER JOIN playlist_games ON games_library.id = playlist_games.gameId 
+        WHERE playlist_games.playlistId = :playlistId
+    """)
+    fun getGamesForPlaylist(playlistId: String): Flow<List<GameEntity>>
 }

@@ -1,5 +1,6 @@
 package com.vdggrtf.playlog.presentation.main.game_details
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,6 +9,7 @@ import com.vdggrtf.playlog.domain.model.AchievementDifficulty
 import com.vdggrtf.playlog.domain.model.CustomChallengeModel
 import com.vdggrtf.playlog.domain.model.GameModel
 import com.vdggrtf.playlog.domain.model.GameStatus
+import com.vdggrtf.playlog.domain.model.PlaylistModel
 import com.vdggrtf.playlog.domain.usecase.main.challenge.GetChallengesForGameUseCase
 import com.vdggrtf.playlog.domain.usecase.main.game.ChangeGameStatusUseCase
 import com.vdggrtf.playlog.domain.usecase.main.game.FetchAndSyncRemoteGameUseCase
@@ -17,6 +19,8 @@ import com.vdggrtf.playlog.domain.usecase.main.game.GetCommunityRatingUseCase
 import com.vdggrtf.playlog.domain.usecase.main.game.GetLocalGameUseCase
 import com.vdggrtf.playlog.domain.usecase.main.game.ObserveLocalGameStatusUseCase
 import com.vdggrtf.playlog.domain.usecase.main.game.RetryAiEvaluationUseCase
+import com.vdggrtf.playlog.domain.usecase.main.playlist.AddGameToPlaylistUseCase
+import com.vdggrtf.playlog.domain.usecase.main.playlist.ObserveMyPlaylistsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +46,7 @@ data class GameDetailsState(
     val communityVotesCount: Int = 0,
     val customChallenges: List<CustomChallengeModel> = emptyList(),
     val isChallengeVerifying: Boolean = false,
+    val myPlaylists: List<PlaylistModel> = emptyList()
 )
 
 
@@ -57,6 +62,8 @@ class GameDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getBestGameDealUseCase: GetBestGameDealUseCase,
     private val getCommunityRatingUseCase: GetCommunityRatingUseCase,
+    private val observeMyPlaylistsUseCase: ObserveMyPlaylistsUseCase,
+    private val addGameToPlaylistUseCase: AddGameToPlaylistUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(GameDetailsState())
@@ -71,6 +78,12 @@ class GameDetailsViewModel @Inject constructor(
             loadGameChallenges(gameId)
         } else {
             _state.update { it.copy(isLoading = false, error = "Invalid game ID") }
+        }
+
+        viewModelScope.launch {
+            observeMyPlaylistsUseCase().collect { playlists ->
+                _state.update { it.copy(myPlaylists = playlists) }
+            }
         }
     }
 
@@ -104,7 +117,6 @@ class GameDetailsViewModel @Inject constructor(
                             isAiThinking = false
                         )
                     }
-
                     // LOAD DEALS (CheapShark)
                     loadCheapShark(remoteData.game.name)
                 },
@@ -210,6 +222,16 @@ class GameDetailsViewModel @Inject constructor(
                 onFailure = { error ->
                     _state.update { it.copy(error = error.message) }
                 }
+            )
+        }
+    }
+
+    fun addGameToPlaylist(playlistId: String) {
+        val gameId = _state.value.game?.id ?: return
+        viewModelScope.launch {
+            addGameToPlaylistUseCase(playlistId = playlistId, gameId = gameId).fold(
+                onSuccess = { Log.d("GameDetails", "Игра добавлена в плейлист!") },
+                onFailure = { Log.e("GameDetails", "Ошибка: ${it.message}") }
             )
         }
     }

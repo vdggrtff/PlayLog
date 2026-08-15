@@ -3,6 +3,9 @@ package com.vdggrtf.playlog.presentation.main.recommendation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vdggrtf.playlog.domain.model.GameModel
+import com.vdggrtf.playlog.domain.model.PlaylistModel
+import com.vdggrtf.playlog.domain.usecase.main.playlist.ObserveMyPlaylistsUseCase
+import com.vdggrtf.playlog.domain.usecase.main.recommendation.GetIndieGamesUseCase
 import com.vdggrtf.playlog.domain.usecase.main.recommendation.GetPopularGamesUseCase
 import com.vdggrtf.playlog.presentation.main.my_library.AdvancedFilters
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,11 +20,17 @@ data class RecommendationState (
     val isLoading: Boolean = false,
     val popularGames: List<GameModel> = emptyList(),
     val error: String? = null,
+    val indieGames: List<GameModel> = emptyList(),
+    val playlists: List<PlaylistModel> = emptyList(),
     val gridColumns: Int = 2,
 )
 
 @HiltViewModel
-class RecommendationViewModel @Inject constructor(private val getPopularGamesUseCase: GetPopularGamesUseCase): ViewModel() {
+class RecommendationViewModel @Inject constructor(
+    private val getPopularGamesUseCase: GetPopularGamesUseCase,
+    private val getIndieGamesUseCase: GetIndieGamesUseCase,
+    private val observeMyPlaylistsUseCase: ObserveMyPlaylistsUseCase
+): ViewModel() {
 
     private val _state = MutableStateFlow(RecommendationState())
     val state: StateFlow<RecommendationState> = _state.asStateFlow()
@@ -33,6 +42,19 @@ class RecommendationViewModel @Inject constructor(private val getPopularGamesUse
 
     init {
         loadPopularGames()
+
+        viewModelScope.launch {
+            getIndieGamesUseCase().fold(
+                onSuccess = { games -> _state.update { it.copy(indieGames = games) } },
+                onFailure = { /* игнорим или пишем в лог */ }
+            )
+        }
+
+        viewModelScope.launch {
+            observeMyPlaylistsUseCase().collect { myLists ->
+                _state.update { it.copy(playlists = myLists) }
+            }
+        }
     }
 
     fun loadPopularGames() {

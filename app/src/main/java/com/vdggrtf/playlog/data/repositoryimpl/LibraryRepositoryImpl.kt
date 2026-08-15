@@ -151,6 +151,12 @@ class LibraryRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun getGamesForPlaylist(playlistId: String): Flow<List<GameModel>> {
+        return dao.getGamesForPlaylist(playlistId).map { entities ->
+            entities.map { it.toDomainModel() }
+        }
+    }
+
     override suspend fun clearLocalDatabase() {
         withContext(Dispatchers.IO) {
             try {

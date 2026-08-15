@@ -35,7 +35,8 @@ fun GameManagementBottomSheet(
     gameState: GameDetailsState,
     onDismiss: () -> Unit,
     onUpdateStatus: (GameStatus) -> Unit,
-    onProveClick: () -> Unit
+    onProveClick: () -> Unit,
+    onAddToPlaylistClick: () -> Unit
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -74,6 +75,22 @@ fun GameManagementBottomSheet(
                     ) {
                         Text(stringResource(R.string.confirm_100), color = AiAccent, fontWeight = FontWeight.Bold)
                     }
+                }
+            }
+            StatusOptionRow("Add to Playlist 📂", false) {
+                onAddToPlaylistClick() // Вызываем переданную лямбду
+                onDismiss()            // Закрываем шторку
+            }
+
+            if (gameState.isSavedLibrary) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = { onDismiss(); onProveClick() },
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E5FF).copy(alpha = 0.1f)),
+                    border = BorderStroke(1.dp, Color(0xFF00E5FF)), shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(stringResource(R.string.confirm_100), color = Color(0xFF00E5FF), fontWeight = FontWeight.Bold)
                 }
             }
 

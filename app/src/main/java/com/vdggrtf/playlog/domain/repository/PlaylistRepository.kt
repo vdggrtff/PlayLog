@@ -13,4 +13,8 @@ interface PlaylistRepository {
 
     // 3. Создание нового плейлиста
     suspend fun createPlaylist(title: String, description: String): Result<Unit>
+
+    suspend fun addGameToPlaylist(playlistId: String, gameId: Int): Result<Unit>
+
+    suspend fun removeGameFromPlaylist(playlistId: String, gameId: Int): Result<Unit>
 }

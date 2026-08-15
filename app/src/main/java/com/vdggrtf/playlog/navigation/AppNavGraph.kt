@@ -11,6 +11,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.vdggrtf.playlog.presentation.main.recommendation.playlists.PlaylistDetailsRoute
 import com.vdggrtf.playlog.presentation.auth.login.LoginRoute
 import com.vdggrtf.playlog.presentation.auth.registrartion.RegistrationRoute
 import com.vdggrtf.playlog.presentation.main.achieve_hunting_screen.AchievementsRoute
@@ -23,6 +24,7 @@ import com.vdggrtf.playlog.presentation.main.recommendation.ai.AiAssistantRoute
 import com.vdggrtf.playlog.presentation.main.recommendation.custom_challenges.ChallengeBoardRoute
 import com.vdggrtf.playlog.presentation.main.recommendation.custom_challenges.challenge.ChallengeDetailsRoute
 import com.vdggrtf.playlog.presentation.main.recommendation.search.SearchRoute
+import com.vdggrtf.playlog.presentation.main.recommendation.see_all.SeeAllGamesRoute
 import com.vdggrtf.playlog.presentation.splash.SplashRoute
 
 @Composable
@@ -84,7 +86,14 @@ fun AppNavGraph(navController: NavHostController) {
                 onSearchClick = { navController.navigate(Screen.SearchScreen.route) },
                 onGameClick = { gameId -> navController.navigate("details/$gameId") },
                 onAiAssistantClick = { navController.navigate(Screen.AiRecommendationScreen.route) },
-                onNavigateToChallenges = { navController.navigate(Screen.CustomChallengesScreen.route) }
+                onNavigateToChallenges = { navController.navigate(Screen.CustomChallengesScreen.route) },
+                onNavigateToSeeAll = { category ->
+                    navController.navigate("see_all/$category")
+                },
+                onNavigateToPlaylist = { playlistId ->
+                    // Тут передаем ID и какое-нибудь дефолтное имя, либо достаем имя из базы позже
+                    navController.navigate("playlist_details/$playlistId/Playlist")
+                }
             )
         }
         composable(route = Screen.CustomChallengesScreen.route) {
@@ -164,6 +173,27 @@ fun AppNavGraph(navController: NavHostController) {
                         "details/$gameId"
                     )
                 }
+            )
+        }
+        composable(
+            route = "playlist_details/{playlistId}/{playlistTitle}",
+            arguments = listOf(
+                navArgument("playlistId") { type = NavType.StringType },
+                navArgument("playlistTitle") { type = NavType.StringType }
+            )
+        ) {
+            PlaylistDetailsRoute(
+                onBackClick = { navController.popBackStack() },
+                onGameClick = { gameId -> navController.navigate("details/$gameId") }
+            )
+        }
+        composable(
+            route = "see_all/{category}",
+            arguments = listOf(navArgument("category") { type = NavType.StringType })
+        ) {
+            SeeAllGamesRoute(
+                onBackClick = { navController.popBackStack() },
+                onGameClick = { gameId -> navController.navigate("details/$gameId") }
             )
         }
 

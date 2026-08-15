@@ -3,9 +3,11 @@ package com.vdggrtf.playlog.data.repositoryimpl
 import android.util.Log
 import com.vdggrtf.playlog.data.local.dao.PlaylistDao
 import com.vdggrtf.playlog.data.local.entity.PLAYLIST_DB_NAME
+import com.vdggrtf.playlog.data.local.entity.PlaylistGameCrossRef
 import com.vdggrtf.playlog.data.mapper.toDomainModel
 import com.vdggrtf.playlog.data.mapper.toEntity
 import com.vdggrtf.playlog.data.network.dto.supabase.playlist.PlaylistDto
+import com.vdggrtf.playlog.data.network.dto.supabase.playlist.PlaylistGameDto
 import com.vdggrtf.playlog.domain.model.PlaylistModel
 import com.vdggrtf.playlog.domain.repository.PlaylistRepository
 import io.github.jan.supabase.SupabaseClient
@@ -74,6 +76,42 @@ class PlaylistRepositoryImpl @Inject constructor(
             Result.success(Unit)
         } catch (e: Exception){
             Log.e("PlaylistRepo", "Ошибка создания плейлиста: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun addGameToPlaylist(playlistId: String, gameId: Int): Result<Unit> {
+        return try {
+            // 1. Отправляем в облако (Supabase) в таблицу-связку
+            val dto = PlaylistGameDto(playlistId = playlistId, gameIdRawg = gameId)
+            supabase.from("playlist_games").insert(dto)
+
+            // 2. Сразу сохраняем локально в Room (чтобы работало оффлайн и UI обновился)
+            val crossRef = PlaylistGameCrossRef(playlistId = playlistId, gameId = gameId)
+            playlistDao.insertPlaylistGames(listOf(crossRef))
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("PlaylistRepo", "Ошибка добавления игры в плейлист: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun removeGameFromPlaylist(playlistId: String, gameId: Int): Result<Unit> {
+        return try {
+            // 1. Удаляем из облака Supabase
+            supabase.from("playlist_games").delete {
+                filter {
+                    eq("playlist_id", playlistId)
+                    eq("game_id_rawg", gameId)
+                }
+            }
+            // 2. Удаляем из Room
+            playlistDao.removeGameFromPlaylist(playlistId, gameId)
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("PlaylistRepo", "Ошибка удаления игры: ${e.message}")
             Result.failure(e)
         }
     }
